@@ -14,6 +14,7 @@ The project is part of a Business Oriented Architecture and called BOA.
 
 ![](docs/programming/images/boa-general-documentation-BOA-Icon.drawio.png)
 
+## Overview
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
 The installation instructions are based on Linux whether as the core operating system or Windows WSL 2.
@@ -27,6 +28,14 @@ The application is based on Java version 17+.
 https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html
 
 Use the link above or an equivalent download link from a different vendor.
+
+Add JAVA_HOME to the PATH.
+
+```shell
+$ export JAVA_HOME=/c/Users/boa/.jdks/corretto-17.0.3
+$ echo $JAVA_HOME
+/c/Users/boa/.jdks/corretto-17.0.3
+```
 
 ### Install Git
 

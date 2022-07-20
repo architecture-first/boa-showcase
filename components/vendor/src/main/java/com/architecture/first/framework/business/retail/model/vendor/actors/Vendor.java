@@ -25,10 +25,6 @@ public class Vendor extends Actor {
         setGeneration("1.0.2");
     }
 
-    public Vendor() {
-        setVersion("1.0.1");
-    }
-
     @Override
     protected void init() {
         super.init();
