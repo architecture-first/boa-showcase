@@ -48,7 +48,7 @@ The successful download should include Git Bash.
 
 ### Clone the BOA showcase project
 
-git clone https://github.com/tmiscool/retail.git
+git clone https://github.com/architecture-first/boa-showcase.git
 
 ### Install Docker Desktop (recommended on Windows)
 
