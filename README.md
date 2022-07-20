@@ -208,7 +208,7 @@ Click Ok.
 ## Key Contributers
 
 - [Tony Marius](https://www.linkedin.com/in/tony-marius-05a1898/) - original author, Technical Architect
-- [Paul Parrone](https://www.linkedin.com/in/paulparrone/) - author of Spring, Technical Architect
+- [Paul Parrone](https://www.linkedin.com/in/paulparrone/) - author of Lush, Technical Architect
 - Bill Reeder - Cloud-Computing Architect
 
 ## Links
