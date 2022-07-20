@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-customer
+spec:
+  template:
+    spec:
+      containers:
+        - name: customer
+          image: localhost:5000/boaretail_customer
+          imagePullPolicy: Always

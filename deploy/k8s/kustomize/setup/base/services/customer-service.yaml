@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: boa-retail-customer-service
+spec:
+  type: LoadBalancer
+  selector:
+    platform: boa
+    app: retail
+    service: customer
+  ports:
+    - port: 8084
+      targetPort: svc-port

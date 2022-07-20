@@ -1,0 +1,16 @@
+{
+  "AcquireCrossSellProducts": {
+    "headers": [],
+    "method": "GET",
+    "uri": "http://universities.hipolabs.com/search",
+    "params": ["name=middle"],
+    "body": {}
+  },
+  "RecordTransaction": {
+    "headers": [],
+    "method": "POST",
+    "uri": "http://localhost:8090/transaction/record",
+    "params": [],
+    "body": {}
+  }
+}

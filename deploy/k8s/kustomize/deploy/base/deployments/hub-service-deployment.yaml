@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-hub-service
+  labels:
+    platform: boa
+    app: retail
+    service: hub-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      platform: boa
+      app: retail
+      service: hub-service
+  template:
+    metadata:
+      labels:
+        platform: boa
+        app: retail
+        service: hub-service
+    spec:
+      containers:
+        - name: hub-service
+          image: boaretail_hub-service
+          ports:
+            - name: hub-svc-port
+              containerPort: 3010
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PORT
+            - name: PROXY_URL
+              value: "boa-retail-customer-service:8084"
+            - name: ROOT_PATH
+              value: "ui-customer"
+            - name: DEBUG
+              value: "http,router,express:*"
+      serviceAccountName: boa-service-account
+      hostname: hub-service

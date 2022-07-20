@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-identity-provider
+spec:
+  template:
+    spec:
+      containers:
+        - name: identity-provider
+          image: localhost:5000/boaretail_identity-provider
+          imagePullPolicy: Always

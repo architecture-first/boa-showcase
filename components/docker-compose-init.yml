@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    hostname: redis
+  database:
+    image: mongo
+    container_name: db
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=Architecture
+      - MONGO_INITDB_ROOT_PASSWORD=f1rst
+      - MONGO_INITDB_DATABASE=architecture_first_001
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    hostname: db
+  advertiser-service:
+    ports:
+      - 4001:3001
+    build:
+      context: ./external/advertiser-service
+  hub-service:
+    depends_on:
+      - redis
+    ports:
+      - 4010:3010
+    build:
+      context: ./external/hub-service
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PROXY_URL=customer:8084
+      - ROOT_PATH=/usr/src/app/ui-customer
+      - DEBUG=http,router,express:*
+  identity-provider:
+      depends_on:
+        - redis
+        - database
+      ports:
+        - 5005:5005
+        - 9081:8081
+      build:
+        context: ./identity-provider
+      env_file:
+        - .env
+      environment:
+        - TASKLIST_ROOT_PATH=none
+      hostname: identity-provider

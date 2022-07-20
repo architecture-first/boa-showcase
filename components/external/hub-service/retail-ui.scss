@@ -1,0 +1,12 @@
+.page {
+  height: 100%;
+  width: 100%;
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 100%;
+  width: 100%;
+}
+

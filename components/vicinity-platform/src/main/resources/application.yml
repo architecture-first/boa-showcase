@@ -1,0 +1,4 @@
+vicinity:
+  bulletin-board:
+    items:
+      Fdefault-expiration-seconds: 3600 #1 hour,172800 # 2 days

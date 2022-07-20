@@ -1,0 +1,67 @@
+services:
+  merchant:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    ports:
+      - 9082:8082
+    build:
+      context: ./merchant
+    env_file:
+      - .env
+    hostname: merchant
+  customer:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+      - hub-service
+    ports:
+      - 5006:5006
+      - 9084:8084
+    build:
+      context: ./customer
+    env_file:
+      - .env
+    environment:
+      - HUB_URL=ws://hub-service:3010
+    hostname: customer
+  cashier:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    ports:
+      - 9083:8083
+    build:
+      context: ./cashier
+    env_file:
+      - .env
+    hostname: cashier
+  advertiser:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    ports:
+      - 9085:8085
+    build:
+      context: ./advertiser
+    env_file:
+      - .env
+    environment:
+      - DYNAMIC_ACTOR_GROUP=Advertiser
+    hostname: advertiser
+  vendor:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    ports:
+      - 9086:8086
+    build:
+      context: ./vendor
+    env_file:
+      - .env
+    hostname: vendor

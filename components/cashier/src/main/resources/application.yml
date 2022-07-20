@@ -1,0 +1,14 @@
+server:
+  port: 8083
+vicinity:
+  task-list:
+    root-path: ${TASKLIST_ROOT_PATH}
+identity-provider:
+  private-key: ${PASS_KEY}
+
+data:
+  database:
+    connectionString: ${DB_CONNECTION_STRING}
+    name: ${DB_NAME}
+redis:
+  host: ${REDIS_HOST}

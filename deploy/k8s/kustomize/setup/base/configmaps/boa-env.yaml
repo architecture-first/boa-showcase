@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boa-env
+  namespace: boa
+data:
+  JOIN_TOKEN: mcDZBUe4LThCtrlDJtvXgujb7i1myJqKAC3
+  OVERRIDE_TOKEN: TMoGdiIA2DFfnv6yG8KOcoe245sryaYKg7Y
+  EXTERNAL_CALLS_ROOT_PATH: logic
+  TASKLIST_ROOT_PATH: tasklists

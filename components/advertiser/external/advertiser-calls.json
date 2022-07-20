@@ -1,0 +1,23 @@
+{
+  "AcquireCrossSellProducts": {
+    "headers": [],
+    "method": "GET",
+    "uri": "http://localhost:3001/advertiser-service/api/crosssells",
+    "params": ["type=Sunglasses"],
+    "body": {}
+  },
+  "AcknowledgeImpression": {
+    "headers": [],
+    "method": "POST",
+    "uri": "http://localhost:3001/advertiser-service/api/impression/ack",
+    "params": [],
+    "body": {}
+  },
+  "UpdateAvailability": {
+    "headers": [],
+    "method": "POST",
+    "uri": "http://localhost:3001/advertiser-service/api/availability/update",
+    "params": [],
+    "body": {}
+  }
+}

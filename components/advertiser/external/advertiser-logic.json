@@ -1,0 +1,58 @@
+{
+  "define": {
+    "AcquireCrossSellProducts": "com.architecture.first.framework.business.retail.events.AcquireCrossSellProductsEvent",
+    "CrossSellsUpdated": "com.architecture.first.framework.business.retail.events.CrossSellsUpdatedEvent",
+    "AcknowledgeImpression": "com.architecture.first.framework.business.retail.events.AcknowledgeImpressionEvent",
+    "UpdateAvailability": "com.architecture.first.framework.business.retail.events.UpdateAvailabilityEvent"
+  },
+  "declare": {
+    "brand-value": "'Ray-ban'"
+  },
+  "on": {
+    "hear": {
+      "AcquireCrossSellProducts": [
+        {
+          "$exec": {
+            "whisper": {
+              "name": "AcquireCrossSellProducts",
+              "extern": true
+            }
+          }
+        },
+        {
+          "$filter": "$.results[?(@.brand == {{brand-value}})]"
+        },
+        {
+          "$exec": {
+            "say": {
+              "name": "CrossSellsUpdated",
+              "to": "Merchant",
+              "payload": {
+                "products": "$$pipeline.results"
+              }
+            }
+          }
+        },
+        {
+          "$exec": {
+            "call": {
+              "name": "AcknowledgeImpression",
+              "payload": {
+                "data": "$$pipeline.results"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "30min": [
+      {
+        "$exec": {
+          "call": {
+            "name": "UpdateAvailability"
+          }
+        }
+      }
+    ]
+  }
+}

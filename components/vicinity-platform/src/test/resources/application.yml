@@ -1,0 +1,7 @@
+vicinity:
+  bulletin-board:
+    items:
+      default-expiration-seconds: 172800 # 2 days
+redis:
+  host: localhost
+  port: 6379

@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-redis-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: redis-service
+          image: localhost:5000/boaretail_redis
+          imagePullPolicy: Always

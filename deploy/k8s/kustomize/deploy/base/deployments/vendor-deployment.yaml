@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-vendor
+  labels:
+    platform: boa
+    app: retail
+    service: vendor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      platform: boa
+      app: retail
+      service: vendor
+  template:
+    metadata:
+      labels:
+        platform: boa
+        app: retail
+        service: vendor
+    spec:
+      containers:
+        - name: vendor
+          image: boaretail_vendor
+          ports:
+            - name: svc-port
+              containerPort: 8086
+          env:
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_CONNECTION_STRING
+            - name: DB_CONNECTION_STRING
+              value: "mongodb://boa-retail-db-service:27027/architecture_first_001"
+            - name: DB_NAME
+              value: "architecture_first_001"
+            - name: REDIS_HOST
+              value: "10.111.222.121"
+            - name: REDIS_PORT
+              value: "6389"
+            - name: EXTERNAL_CALLS_ROOT_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: EXTERNAL_CALLS_ROOT_PATH
+            - name: TASKLIST_ROOT_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: TASKLIST_ROOT_PATH
+            - name: JOIN_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: JOIN_TOKEN
+            - name: OVERRIDE_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: OVERRIDE_TOKEN
+      serviceAccountName: boa-service-account
+      hostname: vendor
+      volumes:
+        - name: boa-env
+          configMap:
+            name: boa-env
+        - name: redis-secret
+          configMap:
+            name: redis-secret

@@ -1,0 +1,27 @@
+server:
+  port: 8082
+vicinity:
+  task-list:
+    root-path: ${TASKLIST_ROOT_PATH}
+  external:
+    root-path: ${EXTERNAL_CALLS_ROOT_PATH}
+identity-provider:
+  private-key: ${PASS_KEY}
+
+data:
+  database:
+    connectionString: ${DB_CONNECTION_STRING}
+    name: ${DB_NAME}
+redis:
+  host: ${REDIS_HOST}
+
+merchant:
+  analysis:
+    minimumAvailableProductThreshold: 200
+    numberOfOrdersToAnalyze: 10
+    numberOfProductsToSuggest: 2
+    bonusPoint:
+      totalPriceThreshold: 40
+      totalPriceFactor: 0.1
+    defaults:
+      reorderQuantity: 10

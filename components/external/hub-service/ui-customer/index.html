@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo Architecture-First BOA Storefront</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@microsoft/fast-components/dist/fast-components.min.js"></script>
+
+    <link rel="stylesheet" href="retail-ui.scss"/>
+</head>
+<body>
+<div id="page" class="page">
+    <div class="header" style="width: 100%; text-align: center; color: white; background-color: rgba(0,0,0,0.6);">
+        Architecture-First BOA Demo Storefront
+    </div>
+    <div class="nav" style="display: grid;grid-template-columns: repeat(3, 1fr);background-color: rgba(0,0,0,0.6); ">
+        <fast-menu id="menu" style="grid-column: 1;grid-row: 1; width:200px;">
+            <fast-menu-item>Products</fast-menu-item>
+        </fast-menu>
+        <div class="customerPanel" style="grid-column: 3;grid-row: 1;">
+            <fast-button id="loginButton" style="width:120px;">Login</fast-button>
+            <fast-button id="viewCartButton" style="width:120px;">Shopping Cart</fast-button>
+        </div>
+
+    </div>
+    <div id="products" class="body" style="width: 100%;display: flex;">
+        <div id="productGrid" style="height: 800px; width:100%;" class="ag-theme-alpine"></div>
+    </div>
+
+    <dialog id="loginDialog" style="width: 200px;background-color: lightgrey; z-index: 10">
+        <div>Register (Anonymously) <button id="loginDialogRegisterButton">Register</button></div>
+        <div><p>Login</p></div>
+        <form method="dialog">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" readonly>
+            <button id="loginOk">Ok</button>
+            <button>Cancel</button>
+        </form>
+    </dialog>
+
+    <dialog id="registrationDialog" style="height: 300px; width: 600px;background-color: floralwhite; z-index: 15">
+        <div>
+            <span id="registrationMessage">Registration (Fake). Note: The data will be periodically cleared</span>
+        </div>
+        <form method="dialog">
+            <div class="passwordContainer" style="border: black; border-width: thin; padding-bottom: 30px;">
+                <div style="padding-bottom: 10px;">
+                    <label for="passwordEntry">Password:</label>
+                    <input type="password" id="passwordEntry" name="passwordEntry" value="5EXfr7qL3S3LVIMd" readonly>
+                </div>
+                <div style="padding-bottom: 10px;">
+                    <label for="passwordVerify">Password Verify:</label>
+                    <input type="password" id="passwordVerify" name="passwordVerify" value="5EXfr7qL3S3LVIMd" readonly>
+                </div>
+            </div>
+            <div style="padding-bottom: 30px;">
+                <label for="firstname">First Name:</label>
+                <input type="text" id="firstname" name="firstname" style="width: 200px;">
+            </div>
+            <div style="padding-bottom: 30px;">
+                <label for="lastname">Last Name:</label>
+                <input type="text" id="lastname" name="lastname" value="Anonymous" style="width: 400px" readonly>
+            </div>
+            <div style="padding-bottom: 30px;">
+                <label for="emailAddress">Email Address:</label>
+                <input type="text" id="emailAddress" name="emailAddress" value="Anonymous@anonymous.com" style="width: 400px" readonly>
+            </div>
+            <button id="registerOk">Ok</button>
+            <button>Cancel</button>
+        </form>
+    </dialog>
+
+    <dialog id="productDialog" style="height: 500px; width: 400px;background-color: floralwhite; z-index: 30">
+        <div>
+            <span id="loginCartMessage">Log in to add item to cart</span>
+            <button id="loginCheckoutButton" style="width:120px;">Login</button>
+        </div>
+        <p><div id="productType"></div></p>
+        <form method="dialog">
+            <img id="productImage" width="100%"/>
+            <div id="productName" style="font-weight: bold"></div>
+            <div>
+                <span style="padding-right: 10px;">Current Price:</span>
+                <span id="productPrice" style="color: blue"></span>
+            </div>
+            <div id="containerOriginalPrice">
+                <span style="padding-right: 10px;">Original Price:</span>
+                <span id="productOriginalPrice" style="color: red; text-decoration: line-through"></span>
+            </div>
+
+            <div style="padding-top: 20px;padding-bottom: 10px;">
+                <label for="quantityChosen">Quantity:</label>
+                <select id="quantityChosen">
+                    <option value="1">1</option>
+                </select>
+                <span id="productCartMessage" style="color: green;"></span>
+            </div>
+            <div class="buttonBar">
+                <button id="productDialogAddToCart" style="background-color: gainsboro">Add To Cart</button>
+                <button id="productDialogClose">Close</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="shoppingCartDialog" style="height: 900px; width: 800px;background-color: floralwhite; z-index: 25">
+        <div>
+            <span id="shoppingCartMessage" style="font-weight: bold; font-family: Arial; color:darkorange">Shopping Cart</span>
+            <button id="shoppingCartCheckoutButton" style="width:120px">Checkout</button>
+            <span style="padding-left: 20px;">
+                <button id="shoppingCartDialogClose">Close</button>
+            </span>
+        </div>
+        <div id="cartContainerTotalPrice">
+            <span style="padding-right: 10px;">Total Price:</span>
+            <span id="cartTotalPrice" style="color: royalblue;"></span>
+        </div>
+        <div id="cartContainerShippingCost">
+            <span style="padding-right: 10px;">Shipping Cost:</span>
+            <span id="cartShippingCost" style="color: darkgreen;"></span>
+        </div>
+        <div id="shoppingCartGrid" style="height: 100%; width:100%;" class="ag-theme-alpine"></div>
+    </dialog>
+
+    <dialog id="orderConfirmationDialog" style="height: 900px; width: 800px;background-color: floralwhite; z-index: 35">
+        <div>
+            <span id="orderConfirmationMessage" style="padding-right: 25px;font-weight: bold; font-family: Arial; color:darkblue">Order Confirmation</span>
+            <button id="orderConfirmationDialogClose">Close</button>
+        </div>
+        <div id="containerTotalPrice">
+            <span style="padding-right: 10px;">Total Price:</span>
+            <span id="totalPrice" style="color: royalblue;"></span>
+        </div>
+        <div id="containerShippingCost">
+            <span style="padding-right: 10px;">Shipping Cost:</span>
+            <span id="shippingCost" style="color: darkgreen;"></span>
+        </div>
+        <div id="orderConfirmationGrid" style="height: 100%; width:100%;" class="ag-theme-alpine"></div>
+    </dialog>
+
+    <dialog id="suggestedProductsDialog" style="height: 500px; width: 600px;background-color: floralwhite; z-index: 18">
+        <div>
+            <span id="suggestedProductsMessage" style="font-weight: bold; font-family: Arial">Lot's of people are buying these</span>
+        </div>
+        <button id="suggestedProductsDialogClose">Close</button>
+        <div id="suggestedProductsGrid" style="height: 100%; width:100%;" class="ag-theme-alpine"></div>
+    </dialog>
+
+</div>
+
+<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+<script>
+    (function() {
+
+        // T-Query (start)
+        function $tm(id) {
+            let target = document.getElementById(id);
+            target.on = (eventname, fnHandler) => {
+                target.addEventListener(eventname, fnHandler);
+            }
+            return target;
+        }
+        // T-Query (end)
+
+        // Utilities (start)
+        const Utilities = {
+            toDecimals: (num, numDecimals) => {
+                return (Math.round(num * 100) / 100).toFixed(numDecimals);
+            },
+            randomString: (length, chars) => {
+                var result = '';
+                for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+                return result;
+            },
+            randomStringByTime: () => {
+                let timeAsNum = new Date().getTime();
+
+                return Utilities.randomString(10,'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') + timeAsNum;
+
+            },
+            project: () => {
+                let params = new URLSearchParams(window.location.search);
+                let prj = params.get("boa-project") || "";
+                return prj;
+            }
+        }
+
+        // Utilities (end)
+
+        const boa = {
+
+        }
+        // Registration (start)
+        boa.registration = {
+            randomVal: Utilities.randomStringByTime(),
+            registrationDialog: $tm("registrationDialog"),
+            emailAddress: $tm("emailAddress"),
+            registerOk: $tm("registerOk"),
+            displayRegistrationDialog: () => {
+                // bind (start)
+                $tm("lastname").value = `Anonymous${boa.registration.randomVal}`;
+                emailAddress.value = `Anon.${boa.registration.randomVal}@anonymous.com`;
+                // bind (end)
+
+                boa.registration.registrationDialog.showModal();
+            },
+            init: () => {
+                boa.registration.registerOk.on("click", () => {
+                    let firstname = $tm("firstname").value;
+                    if (!firstname) {
+                        alert("Firstname is the only field that must be entered.");
+                    }
+                    else {
+                        let customerInfo = {
+                            password: $tm("passwordEntry").value,
+                            firstName: $tm("firstname").value,
+                            middleInitial: '',
+                            lastname: $tm("lastname").value,
+                            emailAddress: $tm("emailAddress").value,
+                            billingAddress: {
+                                street: `${boa.registration.randomVal} Random Road`,
+                                city: "Lottery",
+                                state: "NJ",
+                                zip: "01111"
+                            },
+                        }
+
+                        registerCustomer(customerInfo)
+                            .then((userToken) => {
+                                if (userToken && !userToken.rejected) {
+                                    console.log("successful registration");
+                                    firstName = userToken.firstName;
+                                    boa.login.showLoggedInUser();
+                                    boa.login.recordLogIn(true);
+                                    boa.login.recordRegistration(boa.registration.emailAddress.value);
+                                    alert("Successfully registered " + boa.registration.emailAddress.value + ". Please keep for logging back in.");
+                                }
+                                else {
+                                    console.log(reason);
+                                    alert("registration failed: " + reason);
+                                }
+                            })
+                            .catch((reason => {
+                                console.log(reason);
+                                alert("registration failed: " + reason);
+                            }));
+                    }
+                })
+            }
+        }
+        boa.registration.init();
+        // Registration (end)
+
+        // Login (start)
+        boa.login = {
+            firstname: "",
+            loginDialog: $tm("loginDialog"),
+            loginButton: $tm("loginButton"),
+            viewCartButton: $tm("viewCartButton"),
+            page: $tm("page"),
+            isLoggedIn: () => {
+                return sessionStorage["architecture-first.boa.logged-in"];
+            },
+            recordLogIn: (status) => {
+                sessionStorage["architecture-first.boa.logged-in"] = status;
+                boa.login.viewCartButton.disabled = false;
+                const event = new Event('LogInSuccess');
+                boa.login.page.dispatchEvent(event);
+            },
+            logOut: () => {
+                sessionStorage.removeItem("architecture-first.boa.logged-in");
+                boa.login.viewCartButton.disabled = true;
+                const event = new Event('LogOut');
+                boa.login.page.dispatchEvent(event);
+            },
+            recordRegistration: (username) => {
+                localStorage["architecture-first.boa.username"] = username;
+            },
+            getUsername: () => {
+                return localStorage["architecture-first.boa.username"];
+            },
+            displayLoginDialog: () => {
+                // bind (start)
+                const username = boa.login.getUsername();
+                if (username) {
+                    $tm("username").value = username;
+                }
+                $tm("password").value = "5EXfr7qL3S3LVIMd";
+                // bind (end)
+
+                boa.login.loginDialog.showModal();
+            },
+            parseJwt: (token) => {
+                try {
+                    return JSON.parse(atob(token.split('.')[1]));
+                } catch (e) {
+                    return null;
+                }
+            },
+            storeToken: (token) => {
+                return sessionStorage["architecture-first.token"] = token;
+            },
+            getToken: () => {
+                return sessionStorage["architecture-first.token"];
+            },
+            removeToken: () => {
+                sessionStorage.removeItem("architecture-first.token");
+            },
+            showLoggedInUser: () => {
+                if (!boa.login.firstName) {
+                    let info = boa.login.parseJwt(boa.login.getToken());
+                    boa.login.firstName = info.name;
+                }
+                boa.login.loginButton.innerText = `Welcome ${boa.login.firstName}!`
+            },
+            init: () => {
+                boa.login.page.on("LogOut", () => {
+                    boa.login.loginButton.innerText = "Login";
+                    boa.login.viewCartButton.disabled = true;
+                });
+
+                $tm("loginDialogRegisterButton").on("click", () => {
+                    if (!boa.login.isLoggedIn()) {
+                        boa.login.loginDialog.close();
+                        boa.registration.displayRegistrationDialog();
+                    }
+                });
+
+                boa.login.viewCartButton.disabled = true;
+                if (boa.login.isLoggedIn()) {
+                    boa.login.showLoggedInUser();
+                    boa.login.viewCartButton.disabled = false;
+                }
+
+                $tm("loginButton").on("click", () => {
+                    if (!boa.login.isLoggedIn()) {
+                        boa.login.displayLoginDialog();
+                    }
+                });
+
+                $tm("loginOk").on("click", () => {
+                    let username = $tm("username").value;
+                    let password = $tm("password").value;
+                    loginToServer(username, password)
+                        .then((response) => {
+                            if (response.token) {
+                                console.log("successful log in");
+                                boa.login.firstName = response.firstName;
+                                boa.login.showLoggedInUser();
+                                boa.login.recordLogIn(true);
+                            }
+                            else {
+                                console.log(reason);
+                                alert("login failed");
+                            }
+                        })
+                        .catch((reason => {
+                            console.log(reason);
+                            alert("login failed");
+                        }));
+                });
+            }
+        }
+
+
+        boa.login.init();
+        // Login (end)
+
+        // Products (start)
+        boa.products = {
+            productGrid: $tm("productGrid"),
+            productGridOptions: {
+
+                // each entry here represents one column
+                columnDefs: [
+                    { field: "name", headerName: "Product" },
+                    { field: "imageUrl", headerName: "Visual", width: 300,
+                        cellRenderer: (params) => `<img style="height: 300px; width:300px" src=${params.data.imageUrl} />`
+                    },
+                    { field: "price",
+                        cellRenderer: (params) => `<span style="color: royalblue"> ${params.data.price[0].value} </span>`
+                    },
+                    { field: "productId", hide: true, }
+                ],
+
+                // default col def properties get applied to all columns
+                defaultColDef: {sortable: true, filter: true},
+                domLayout: 'autoHeight',
+
+                rowHeight: 300,
+                rowSelection: 'none', // allow rows to be selected
+                animateRows: true, // have rows animate to new positions when sorted
+
+                // example event handler
+                onCellClicked: params => {
+                    console.log('cell was clicked', params);
+                    fetchProduct(params.data.productId).then((results) => {
+                        boa.product.addedProduct = results;
+                    })
+                        .catch((reason => {
+                            console.log(reason);
+                        }));
+                }
+            },
+            init: () => {
+                new agGrid.Grid(boa.products.productGrid, boa.products.productGridOptions);
+            }
+        }
+        boa.products.init();
+        // Products (end)
+
+        // Product (start)
+        boa.product = {
+            addedProduct: "",
+            productCartMessage: $tm("productCartMessage"),
+            loginCartMessage: $tm("loginCartMessage"),
+            addToCartButton: $tm("productDialogAddToCart"),
+            loginCheckoutButton: $tm("loginCheckoutButton"),
+            productDialog: $tm("productDialog"),
+            displayProductDialog: (results) => {
+                // bind (start)
+
+                $tm("productImage").src = results.imageUrl;
+                $tm("productName").innerText = results.name;
+                $tm("productType").innerText = results.type;
+                $tm("productPrice").innerText = results.calculatedPrice;
+
+                boa.product.productCartMessage.innerText = "";
+
+                let containerOriginalPrice = $tm("containerOriginalPrice");
+                let productOriginalPrice = $tm("productOriginalPrice");
+                if (results.discounts.length) {
+                    productOriginalPrice.innerText = results.originalPrice;
+                    containerOriginalPrice.style.display = "block";
+                }
+                else {
+                    containerOriginalPrice.style.display = "none";
+                }
+
+                if (boa.login.isLoggedIn()) {
+                    boa.product.loginCheckoutButton.innerText = "Checkout";
+                    boa.product.loginCartMessage.innerText = "Click here to check out";
+                    boa.product.addToCartButton.disabled = false;
+                    boa.product.addToCartButton.title = "";
+                }
+                else {
+                    boa.product.loginCheckoutButton.innerText = "Login";
+                    boa.product.loginCartMessage.innerText = "Log in to add item to cart";
+                    boa.product.addToCartButton.disabled = true;
+                    boa.product.addToCartButton.title = "You must be logged in to add the product";
+                }
+                // bind (end)
+
+                boa.product.productDialog.showModal();
+            },
+            onLogin: () => {
+                boa.product.loginCheckoutButton.innerText = "Checkout";
+                boa.product.loginCartMessage.innerText = "Click here to check out";
+                boa.product.addToCartButton.disabled = false;
+                boa.product.addToCartButton.title = "";
+            },
+            onLogout: () => {
+                boa.product.loginCheckoutButton.innerText = "Login";
+                boa.product.loginCartMessage.innerText = "Log in to add item to cart";
+                boa.product.addToCartButton.disabled = true;
+                boa.product.addToCartButton.title = "You can only add one product at this time";
+            },
+            init: () => {
+                boa.product.addToCartButton.on("click", () => {
+                    productCartMessage.innerText = "item(s) added to cart";
+                    boa.product.addToCartButton.disabled = true;
+                    boa.product.addToCartButton.title = "You can only add one product at this time";
+                    let quantityChosen = $tm("quantityChosen");
+
+                    let cartItem = {
+                        productId: boa.product.addedProduct.productId,
+                        attributes: boa.product.addedProduct.attributes,
+                        quantity: quantityChosen.value,
+                        originalPrice: boa.product.addedProduct.originalPrice,
+                        calculatedPrice: boa.product.addedProduct.calculatedPrice,
+                        discounts: boa.product.addedProduct.discounts
+                    };
+                    addProductToCart(cartItem)
+                        .catch((reason => {
+                            console.log(reason);
+                        }));
+                });
+
+                boa.product.loginCheckoutButton.on("click", () => {
+                    if (!boa.login.isLoggedIn()) {
+                        boa.login.displayLoginDialog();
+                    }
+                    else {
+                        boa.checkout.performCheckout();
+                        boa.product.productDialog.close();
+                        alert("checkout in progress...")
+                    }
+                });
+
+                $tm("page").on("LogInSuccess", boa.product.onLogin);
+                $tm("page").on("LogOut", boa.product.onLogout);
+            }
+        }
+        boa.product.init();
+        // Product (end)
+
+        // Shopping Cart (start)
+        boa.cart = {
+            shoppingCartGrid: $tm("shoppingCartGrid"),
+            shoppingCartDialog: $tm("shoppingCartDialog"),
+            shoppingCartGridOptions: {
+
+                // each entry here represents one column
+                columnDefs: [
+                    { field: "name", headerName: "Product" },
+                    { field: "imageUrl", headerName: "Visual", width: 300,
+                        cellRenderer: (params) => `<img style="height: 300px; width:300px" src=${params.data.imageUrl} />`
+                    },
+                    { field: "quantity", headerName: "Quantity" },
+                    { field: "totalUnitPrice",
+                        cellRenderer: (params) => `<span style="color: royalblue"> ${params.data.totalUnitPrice} </span>`
+                    }
+                ],
+
+                // default col def properties get applied to all columns
+                defaultColDef: {sortable: false, filter: false},
+
+                rowHeight: 300,
+                rowSelection: 'none', // allow rows to be selected
+                animateRows: false
+            },
+            displayShoppingCartDialog: (order) => {
+                // bind (start)
+                boa.cart.shoppingCartGridOptions.api.setRowData(order.purchaseItems);
+                $tm("shoppingCartCheckoutButton").disabled = !(order.purchaseItems && order.purchaseItems.length);
+
+                $tm("cartShippingCost").innerText = Utilities.toDecimals(order.shippingCost,2);
+                $tm("cartTotalPrice").innerText = Utilities.toDecimals(order.totalPrice,2);
+                // bind (end)
+
+                boa.cart.shoppingCartDialog.showModal();
+            },
+            init: () => {
+                new agGrid.Grid(boa.cart.shoppingCartGrid, boa.cart.shoppingCartGridOptions);
+
+                boa.login.viewCartButton.on("click", () => {
+                    fetchShoppingCart()
+                        .then((order) => {
+                            boa.cart.displayShoppingCartDialog(order);
+                        })
+                        .catch((reason => {
+                            console.log(reason);
+                        }));
+                });
+
+                $tm("shoppingCartCheckoutButton").on("click", () => {
+                    boa.checkout.performCheckout();
+                    boa.cart.shoppingCartDialog.close();
+                    alert("checkout in progress...")
+                });
+
+                boa.cart.shoppingCartDialog.on("click", () => {
+                    boa.cart.shoppingCartDialog.close();
+                });
+            }
+        }
+        boa.cart.init();
+        // Shopping Cart (end)
+
+        // Checkout (start)
+        boa.checkout = {
+            orderNumber: null,
+            orderConfirmationGrid: $tm("orderConfirmationGrid"),
+            orderConfirmationDialog: $tm("orderConfirmationDialog"),
+            orderConfirmationGridOptions: {
+
+                // each entry here represents one column
+                columnDefs: [
+                    { field: "name", headerName: "Product" },
+                    { field: "imageUrl", headerName: "Visual", width: 300,
+                        cellRenderer: (params) => `<img style="height: 300px; width:300px" src=${params.data.imageUrl} />`
+                    },
+                    { field: "quantity", headerName: "Quantity" },
+                    { field: "totalUnitPrice",
+                        cellRenderer: (params) => `<span style="color: royalblue"> ${params.data.totalUnitPrice} </span>`
+                    }
+                ],
+
+                // default col def properties get applied to all columns
+                defaultColDef: {sortable: false, filter: false},
+
+                rowHeight: 300,
+                rowSelection: 'none', // allow rows to be selected
+                animateRows: false
+            },
+            displayOrderConfirmationDialog: (orderConfirmation) => {
+                // bind (start)
+                boa.checkout.orderConfirmationGridOptions.api.setRowData(orderConfirmation.purchaseItems);
+
+                $tm("shippingCost").innerText = Utilities.toDecimals(orderConfirmation.shippingCost,2);
+                $tm("totalPrice").innerText = Utilities.toDecimals(orderConfirmation.totalPrice,2);
+                // bind (end)
+
+                boa.checkout.orderConfirmationDialog.showModal();
+            },
+            performCheckout: () => {
+                checkout()
+                    .then((orderNumber) => boa.checkout.orderNumber = orderNumber);
+            },
+            init: () => {
+                new agGrid.Grid(boa.checkout.orderConfirmationGrid, boa.checkout.orderConfirmationGridOptions);
+
+                boa.checkout.orderConfirmationDialog.on("click", () => {
+                    boa.checkout.orderConfirmationDialog.close();
+                });
+            }
+        }
+        boa.checkout.init();
+        // Checkout (end)
+
+        // Suggested Products (start)
+        boa.suggested = {
+            suggestedProductsGrid: $tm("suggestedProductsGrid"),
+            suggestedProductsDialog: $tm("suggestedProductsDialog"),
+            suggestedProductsGridOptions: {
+
+                // each entry here represents one column
+                columnDefs: [
+                    { field: "name", headerName: "Product" },
+                    { field: "imageUrl", headerName: "Visual", width: 300,
+                        cellRenderer: (params) => `<img style="height: 300px; width:300px" src=${params.data.imageUrl} />`
+                    },
+                    { field: "quantity", headerName: "Quantity" },
+                    { field: "totalUnitPrice",
+                        cellRenderer: (params) => `<span style="color: royalblue"> ${params.data.totalUnitPrice} </span>`
+                    }
+                ],
+
+                // default col def properties get applied to all columns
+                defaultColDef: {sortable: false, filter: false},
+
+                rowHeight: 300,
+                rowSelection: 'none', // allow rows to be selected
+                animateRows: false
+            },
+            displaysuggestedProductsDialog: (suggestedProducts) => {
+                // bind (start)
+                boa.suggested.suggestedProductsGridOptions.api.setRowData(suggestedProducts);
+                // bind (end)
+
+                boa.suggested.suggestedProductsDialog.showModal();
+            },
+            init: () => {
+                new agGrid.Grid(boa.suggested.suggestedProductsGrid, boa.suggested.suggestedProductsGridOptions);
+
+                boa.suggested.suggestedProductsDialog.on("click", () => {
+                    boa.suggested.suggestedProductsGridOptions.api.setRowData([]);
+                    boa.suggested.suggestedProductsDialog.close();
+                });
+            }
+        }
+        boa.suggested.init();
+        //
+        //  Suggested Products(end)
+
+        // Websockets (start)
+        let ws;
+        boa.bridge = {
+            connId: Utilities.randomStringByTime(),
+            handleMessage: (message) => {
+                console.log('message: ' + message);
+                let msg = JSON.parse(message);
+
+                if (msg.error) {
+                    boa.service.handleApiFailures(msg, true);
+                    return;
+                }
+
+                if (msg.suggestedProducts) {
+                    boa.suggested.displaysuggestedProductsDialog(msg.suggestedProducts);
+                }
+                else if (msg.orderConfirmation) {
+                    boa.checkout.displayOrderConfirmationDialog(msg.orderConfirmation)
+                }
+                else if (msg.products) {
+                    boa.products.productGridOptions.api.setRowData(msg.products);
+                }
+                else if (msg.product) {
+                    if (!boa.product.productDialog.open) {
+                        boa.product.displayProductDialog(msg.product);
+                    }
+                }
+            },
+            sendMessage: (message) => {
+                if (!ws) {
+                    console.log("WebSocket connection error");
+                    return ;
+                }
+
+                ws.send(message);
+            },
+            init: () => {
+                if (ws) {
+                    ws.onerror = ws.onopen = ws.onclose = null;
+                    ws.close();
+                }
+
+                let connString = `ws://${location.host}/${boa.bridge.connId}`;
+                try {
+                    ws = new WebSocket(connString);
+                    ws.onopen = () => {
+                        console.log('Connection opened!');
+                    }
+                    ws.onmessage = ({ data }) => boa.bridge.handleMessage(data);
+                    ws.onerror = (message) => {
+                        console.log("Error connecting to socket server");
+                    }
+                    ws.onclose = () => {
+                        ws = null;
+                    }
+                }
+                catch (e) {
+                    console.log("error connecting to websocket");
+                    console.log(e);
+                }
+
+            }
+        }
+        boa.bridge.init();
+        // Websockets (end)
+
+        // API calls (start)
+        boa.service = {
+            handleApiFailures: (response, isSecureArea) => {
+                if (response.status && response.status == 401) {
+                    alert("Unauthorized: Please log in or register");
+                    boa.login.removeToken();
+                    boa.login.logOut();
+
+                    if (!isSecureArea) {
+                        return;
+                    }
+                }
+                else {
+                    alert("Error: " + response.error)
+                }
+                throw new Error(`${response.status} ${response.error}`);
+            },
+            init: () => {
+
+            }
+        }
+        boa.service.init();
+
+        async function fetchProducts(criteria) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify({
+                    name: null
+                })
+            };
+
+            if (boa.login.isLoggedIn()) {
+                httpSettings.headers.Authorization = 'Bearer ' + boa.login.getToken();
+            }
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/products', httpSettings);
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, false);
+            }
+            boa.products.productGridOptions.api.setRowData(results);
+        }
+
+        async function fetchProduct(prodId) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify({
+                    productId: prodId
+                })
+            };
+
+            if (boa.login.isLoggedIn()) {
+                httpSettings.headers.Authorization = 'Bearer ' + boa.login.getToken();
+            }
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/product', httpSettings);
+
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, false);
+            }
+            console.log(results);
+            if (!boa.product.productDialog.open) {
+                boa.product.displayProductDialog(results);
+            }
+
+            return results;
+        }
+
+        async function addProductToCart(cartItem) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + boa.login.getToken(),
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify(cartItem)
+            };
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/cart/addProduct', httpSettings);
+
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, true);
+            }
+            console.log(results);
+        }
+
+        async function fetchShoppingCart(customerId) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + boa.login.getToken(),
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify({})
+            };
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/cart', httpSettings);
+
+            const order = await response.json();
+            if (order.error) {
+                boa.service.handleApiFailures(order, true);
+            }
+            console.log(order);
+
+            return order;
+        }
+
+        async function checkout() {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + boa.login.getToken(),
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify({})
+            };
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/checkout', httpSettings);
+
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, true);
+            }
+            console.log(results);
+
+            return results;
+        }
+
+        async function loginToServer(username, password) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify({
+                    "username": username,
+                    "password": password
+                })
+            };
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/authenticate', httpSettings);
+
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, false);
+            }
+
+            if (!results.rejected) {
+                boa.login.storeToken(results.token);
+            }
+            console.log(results);
+            return results;
+        }
+
+        async function registerCustomer(customerInfo) {
+            if (!ws) boa.bridge.init();
+            let httpSettings = {
+                method: 'POST',
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                // credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json',
+                    "boa-conn": boa.bridge.connId
+                },
+                body: JSON.stringify(customerInfo)
+            };
+            if (Utilities.project()) {
+                httpSettings.headers["boa-project"] = Utilities.project();
+            }
+            const response = await fetch('/api/customer/signUp', httpSettings);
+
+            const results = await response.json();
+            if (results.error) {
+                boa.service.handleApiFailures(results, false);
+            }
+
+            if (!results.rejected) {
+                boa.login.storeToken(results.token);
+            }
+            console.log(results);
+            return results;
+        }
+        // API calls (end)
+
+        // main (start)
+        (function main(){
+            fetchProducts({})
+                .catch((reason => {
+                    console.log(reason);
+                    alert("Server error: " + reason);
+                }));
+        })();
+        // main (end)
+
+    })();
+
+</script>
+</body>
+</html>

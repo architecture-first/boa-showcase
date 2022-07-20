@@ -1,0 +1,127 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    hostname: redis
+  database:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=Architecture
+      - MONGO_INITDB_ROOT_PASSWORD=f1rst
+      - MONGO_INITDB_DATABASE=architecture_first_001
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    hostname: db
+  advertiser-service:
+    ports:
+      - 3001:3001
+    build:
+      context: ./external/advertiser-service
+  hub-service:
+    depends_on:
+      - redis
+    ports:
+      - 3010:3010
+    build:
+      context: ./external/hub-service
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PROXY_URL=customer:8084
+      - ROOT_PATH=/usr/src/app/ui-customer
+      - DEBUG=http,router,express:*
+  identity-provider:
+      depends_on:
+        - redis
+        - database
+      build:
+        context: ./identity-provider
+      environment:
+        - REDIS_HOST=redis
+        - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+        - DB_NAME=architecture_first_001
+        - EXTERNAL_CALLS_ROOT_PATH=logic
+        - TASKLIST_ROOT_PATH=tasklists
+        - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+      hostname: identity-provider
+  merchant:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    build:
+      context: ./merchant
+    environment:
+      - REDIS_HOST=redis
+      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+      - DB_NAME=architecture_first_001
+      - EXTERNAL_CALLS_ROOT_PATH=logic
+      - TASKLIST_ROOT_PATH=tasklists
+      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    hostname: merchant
+  customer:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+      - hub-service
+    build:
+      context: ./customer
+    environment:
+      - REDIS_HOST=redis
+      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+      - DB_NAME=architecture_first_001
+      - EXTERNAL_CALLS_ROOT_PATH=logic
+      - TASKLIST_ROOT_PATH=tasklists
+      - HUB_URL=ws://hub-service:3010
+      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    hostname: customer
+  cashier:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    build:
+      context: ./cashier
+    environment:
+      - REDIS_HOST=redis
+      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+      - DB_NAME=architecture_first_001
+      - EXTERNAL_CALLS_ROOT_PATH=logic
+      - TASKLIST_ROOT_PATH=tasklists
+      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    hostname: cashier
+  advertiser:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    build:
+      context: ./advertiser
+    environment:
+      - REDIS_HOST=redis
+      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+      - DB_NAME=architecture_first_001
+      - EXTERNAL_CALLS_ROOT_PATH=logic
+      - TASKLIST_ROOT_PATH=tasklists
+      - DYNAMIC_ACTOR_GROUP=Advertiser
+      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    hostname: advertiser
+  vendor:
+    depends_on:
+      - redis
+      - database
+      - identity-provider
+    build:
+      context: ./vendor
+    environment:
+      - REDIS_HOST=redis
+      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
+      - DB_NAME=architecture_first_001
+      - EXTERNAL_CALLS_ROOT_PATH=logic
+      - TASKLIST_ROOT_PATH=tasklists
+      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    hostname: vendor

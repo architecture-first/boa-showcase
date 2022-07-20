@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: boa-retail-db-service
+spec:
+  type: NodePort
+  ports:
+    - port: 27027
+      name: db-svc-port
+      targetPort: db-port
+      nodePort: 30027

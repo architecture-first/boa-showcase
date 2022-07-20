@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-redis-service
+  labels:
+    platform: boa
+    app: retail
+    service: redis-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      platform: boa
+      app: retail
+      service: redis-service
+  template:
+    metadata:
+      labels:
+        platform: boa
+        app: retail
+        service: redis-service
+    spec:
+      containers:
+        - name: redis-service
+          image: redis
+          imagePullPolicy: Never
+          ports:
+            - name: redis-port
+              containerPort: 6379
+      serviceAccountName: boa-service-account
+      hostname: redis

@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-cashier
+spec:
+  template:
+    spec:
+      containers:
+        - name: cashier
+          image: localhost:5000/boaretail_cashier
+          imagePullPolicy: Always

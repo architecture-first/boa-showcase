@@ -1,0 +1,7 @@
+{
+  "name": "merchant/ReviewInventory",
+  "tasks": [
+    "merchant/OrderSupplyProducts",
+    "merchant/RecordDeliveries"
+  ]
+}

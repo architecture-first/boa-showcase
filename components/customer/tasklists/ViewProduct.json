@@ -1,0 +1,7 @@
+{
+  "name": "customer/ViewProduct",
+  "tasks": [
+    "merchant/ShowProduct",
+    "customer/ViewProduct"
+  ]
+}

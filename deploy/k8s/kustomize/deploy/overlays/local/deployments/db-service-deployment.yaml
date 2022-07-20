@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-db-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: db-service
+          image: localhost:5000/boaretail_mongo
+          imagePullPolicy: Always

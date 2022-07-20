@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-advertiser
+  labels:
+    platform: boa
+    app: retail
+    service: advertiser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      platform: boa
+      app: retail
+      service: advertiser
+  template:
+    metadata:
+      labels:
+        platform: boa
+        app: retail
+        service: advertiser
+    spec:
+      containers:
+        - name: advertiser
+          image: boaretail_advertiser
+          ports:
+            - name: svc-port
+              containerPort: 8083
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "mongodb://boa-retail-db-service:27027/architecture_first_001"
+            - name: DB_NAME
+              value: "architecture_first_001"
+            - name: PASS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: PASS_KEY
+            - name: REDIS_HOST
+              value: "10.111.222.121"
+            - name: REDIS_PORT
+              value: "6389"
+            - name: DYNAMIC_ACTOR_GROUP
+              value: "Advertiser"
+            - name: EXTERNAL_CALLS_ROOT_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: EXTERNAL_CALLS_ROOT_PATH
+            - name: TASKLIST_ROOT_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: TASKLIST_ROOT_PATH
+            - name: JOIN_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: JOIN_TOKEN
+            - name: OVERRIDE_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: boa-env
+                  key: OVERRIDE_TOKEN
+        - name: advertiser-service
+          image: localhost:5000/boaretail_advertiser-service
+      serviceAccountName: boa-service-account
+      hostname: advertiser
+      volumes:
+        - name: boa-env
+          configMap:
+            name: boa-env
+        - name: redis-secret
+          configMap:
+            name: redis-secret

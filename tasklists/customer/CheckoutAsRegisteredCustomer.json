@@ -1,0 +1,13 @@
+{
+  "name": "customer/CheckoutAsRegisteredCustomer",
+  "tasks": [
+    "merchant/ReserveItems",
+    "cashier/RequestPayment",
+    "customer/ProvidePayment",
+    "cashier/ProcessPayment",
+    "cashier/StoreOrderHistory",
+    "customer/ReceiveBonusPoints",
+    "cashier/PresentOrderConfirmation",
+    "customer/ViewOrderConfirmation"
+  ]
+}

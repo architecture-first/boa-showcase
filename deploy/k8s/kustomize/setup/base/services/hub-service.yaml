@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: boa-retail-hub-service
+spec:
+  type: LoadBalancer
+  selector:
+    platform: boa
+    app: retail
+    service: hub-service
+  ports:
+    - port: 4020
+      targetPort: hub-svc-port

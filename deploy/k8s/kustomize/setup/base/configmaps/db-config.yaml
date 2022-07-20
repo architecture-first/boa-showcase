@@ -1,0 +1,306 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: boa
+data:
+  mongodb.conf: |-
+    systemLog:
+       destination: file
+       path: "/var/log/mongodb/mongod.log"
+       logAppend: true
+    storage:
+       journal:
+          enabled: true
+    processManagement:
+       fork: true
+    net:
+       bindIp: 127.0.0.1,0.0.0.0
+       port: 27017
+  mongo-init.js: |-
+    db = db.getSiblingDB('architecture_first_001');
+
+    db.customers.insertMany([
+        {
+            "userId": 1001,
+            "firstName": "Bob",
+            "middleInitial": "N",
+            "lastName": "Weave",
+            "billingAddress": {
+                "street": "123 Boxing Lane",
+                "city": "Ring",
+                "state": "NJ",
+                "zip": "01111"
+            },
+            "emailAddress": "bob-n-weave@nowhere.com",
+            "username": "bob-n-weave@nowhere.com",
+            "isRegistered": true,
+            "isActive": true,
+            "payment": [
+                {
+                    "type": "MasterCard",
+                    "name": "Bob N Weave",
+                    "number": "****4999",
+                    "expirationDate": ISODate("2029-03-31"),
+                    "isDefault": true
+                }
+            ],
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "userId": 1002,
+            "firstName": "Erin",
+            "lastName": "Waters",
+            "billingAddress": {
+                "street": "456 Sea Drive",
+                "city": "Lakeshore",
+                "state": "NJ",
+                "zip": "01112"
+            },
+            "emailAddress": "erin-waters@nowhere.com",
+            "username": "erin-waters@nowhere.com",
+            "isRegistered": true,
+            "isActive": true,
+            "payment": [
+                {
+                    "type": "Visa",
+                    "name": "Erin Waters",
+                    "number": "****3838",
+                    "expirationDate": ISODate("2028-05-31"),
+                    "isDefault": true
+                }
+            ],
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "userId": 101,
+            "emailAddress": "guest-who@nowhere.com",
+            "isRegistered": false,
+            "isActive": true,
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        }
+    ]);
+
+    // Create Security Customer (start)
+    db.customers.insertOne(
+        {
+            "userId": 201,
+            "firstName": "Bill",
+            "middleInitial": "D",
+            "lastName": "Wahl",
+            "billingAddress": {
+                "street": "99 Security Street",
+                "city": "Fort Lee",
+                "state": "NJ",
+                "zip": "01010"
+            },
+            "emailAddress": "bill.d.wahl@matrix.com",
+            "username": "bill.d.wahl@matrix.com",
+            "isRegistered": true,
+            "isActive": true,
+            "payment": [
+                {
+                    "type": "MasterCard",
+                    "name": "Bill D Wahl",
+                    "number": "****4888",
+                    "expirationDate": ISODate("2029-05-31"),
+                    "isDefault": true
+                }
+            ],
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        }
+    );
+    // Create Security Customer (end)
+
+    db.customer.find();
+
+    db.inventory.insertMany( [
+        {
+            "productId": 1001,
+            "name": "Rod's Fishing Rod",
+            "type": "Fishing Rod",
+            "imageUrl": "images/Fishing-Rod.png",
+            "attributes": ["Color: Red", "Color: White", "Freshwater"],
+            "price": [
+                {"value": NumberDecimal(45.99), "type": "one-time", "discounts": [
+                        {"name": "dollar-off", "partOf": "Dollar Days Discount", "value": NumberDecimal(1.00), "effectiveDate": ISODate("2022-05-10"), "expirationDate": ISODate("2022-05-31") }
+                    ]
+                }
+            ],
+            "unitsAvailable": 105,
+            "isActive": true,
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "productId": 1002,
+            "name": "Larry's Fishing Lure",
+            "type": "Fishing Lure",
+            "imageUrl": "images/Fishing-Lure.png",
+            "attributes": ["Color: Grey", "Freshwater", "Bass"],
+            "price": [
+                {"value": NumberDecimal(9.99), "type": "one-time", "discounts": []
+                }
+            ],
+            "unitsAvailable": 400,
+            "isActive": true,
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "productId": 1003,
+            "name": "Frank's Fishing Boat",
+            "type": "Row Boat",
+            "imageUrl": "images/Fishing-Row-Boat.png",
+            "attributes": ["Color: Blue", "Freshwater", "Oars"],
+            "price": [
+                {"value": NumberDecimal(300.99), "type": "one-time", "discounts": [
+                        {"name": "dollar-off", "partOf": "Dollar Days Discount", "value": NumberDecimal(5.00), "effectiveDate": ISODate("2022-05-10"), "expirationDate": ISODate("2022-05-31") }
+                    ]
+                }
+            ],
+            "unitsAvailable": 40,
+            "isActive": true,
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "productId": 1004,
+            "name": "Ray's Fishing Tool Repair",
+            "type": "Fishing Tool Repair",
+            "imageUrl": "images/Fishing-Repair-Tools.png",
+            "attributes": ["Color: Grey", "Screwdriver", "Wrench"],
+            "price": [
+                {"value": NumberDecimal(25.99), "type": "one-time", "discounts": []
+                }
+            ],
+            "unitsAvailable": 144,
+            "isActive": true,
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        }
+    ]);
+
+    db.inventory.find();
+
+    db.orders.insertMany([
+        {
+            "orderNumber": 100001,
+            "userId": 1001,
+            "billingAddress": {
+                "street": "123 Boxing Lane",
+                "city": "Ring",
+                "state": "NJ",
+                "zip": "01111"
+            },
+            "shippingAddress": {
+                "street": "123 Boxing Lane",
+                "city": "Ring",
+                "state": "NJ",
+                "zip": "01111"
+            },
+            "emailAddress": "bob-n-weave@nowhere.com",
+            "isActive": true,
+            "items": [
+                {
+                    "productId": 1001,
+                    "attributes": ["Color: Red"],
+                    "quantity": 1,
+                    "originalPrice": NumberDecimal("45.99"),
+                    "calculatedPrice": NumberDecimal("44.99"),
+                    "discounts": [NumberDecimal("1.00")]
+                }
+            ],
+            "shippingCost": NumberDecimal("5.00"),
+            "totalPrice": NumberDecimal("49.99"),
+            "datePurchased": ISODate("2022-02-21"),
+            "status": "cart",
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "orderNumber": 100002,
+            "userId": 1002,
+            "shippingAddress": {
+                "street": "456 Sea Drive",
+                "city": "Lakeshore",
+                "state": "NJ",
+                "zip": "01112"
+            },
+            "billingAddress": {
+                "street": "456 Sea Drive",
+                "city": "Lakeshore",
+                "state": "NJ",
+                "zip": "01112"
+            },
+            "emailAddress": "erin-waters@nowhere.com",
+            "isActive": true,
+            "items": [
+                {
+                    "productId": 1001,
+                    "attributes": ["Color: White"],
+                    "quantity": 1,
+                    "originalPrice": NumberDecimal("45.99"),
+                    "calculatedPrice": NumberDecimal("44.99"),
+                    "discounts": [NumberDecimal("1.00")]
+                },
+                {
+                    "productId": 1002,
+                    "attributes": ["Color: Grey"],
+                    "quantity": 2,
+                    "originalPrice": NumberDecimal("9.99"),
+                    "calculatedPrice": NumberDecimal("9.99"),
+                    "discounts": []
+                }
+            ],
+            "shippingCost": NumberDecimal("5.00"),
+            "totalPrice": NumberDecimal("74.97"),
+            "datePurchased": ISODate("2022-02-24"),
+            "status": "complete",
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        },
+        {
+            "orderNumber": 100003,
+            "userId": 101,
+            "shippingAddress": {
+                "street": "789 Guest Ave",
+                "city": "Mountainville",
+                "state": "NJ",
+                "zip": "01113"
+            },
+            "billingAddress": {
+                "street": "789 Guest Ave",
+                "city": "Mountainville",
+                "state": "NJ",
+                "zip": "01113"
+            },
+            "emailAddress": "guest-who@nowhere.com",
+            "isRegistered": false,
+            "isActive": true,
+            "items": [
+                {
+                    "productId": 1003,
+                    "attributes": ["Color: Blue"],
+                    "quantity": 1,
+                    "originalPrice": NumberDecimal("300.99"),
+                    "calculatedPrice": NumberDecimal("295.99"),
+                    "discounts": [NumberDecimal("5.00")]
+                }
+            ],
+            "shippingCost": NumberDecimal("0"),
+            "totalPrice": NumberDecimal("295.99"),
+            "datePurchased": ISODate("2022-02-28"),
+            "status": "complete",
+            "updateDate": new Date(),
+            "updatedBy": "system"
+        }
+    ]);
+
+    db.orders.find();
+
+

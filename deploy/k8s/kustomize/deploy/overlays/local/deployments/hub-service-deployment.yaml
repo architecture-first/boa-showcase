@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boa-retail-hub-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: hub-service
+          image: localhost:5000/boaretail_hub-service
+          imagePullPolicy: Always
