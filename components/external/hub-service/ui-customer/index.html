@@ -493,7 +493,6 @@
                     else {
                         boa.checkout.performCheckout();
                         boa.product.productDialog.close();
-                        alert("checkout in progress...")
                     }
                 });
 
@@ -556,7 +555,6 @@
                 $tm("shoppingCartCheckoutButton").on("click", () => {
                     boa.checkout.performCheckout();
                     boa.cart.shoppingCartDialog.close();
-                    alert("checkout in progress...")
                 });
 
                 boa.cart.shoppingCartDialog.on("click", () => {

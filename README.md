@@ -182,10 +182,6 @@ An anonymous user is entered in the database for this user.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Begin-Checkout.png)
 
-![](docs/programming/images/Getting-Started/Getting-Started-Checkout-in-progress.png)
-
-Click Ok or Close.
-
 8. View Order Confirmation
 
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Order-Confirmation.png)
