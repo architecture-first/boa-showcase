@@ -30,7 +30,7 @@ if [ $MODE = "build" ] || [ $MODE = "up" ]; then
   docker tag mongo boaretail_mongo
 fi
 if [ $MODE = "up" ]; then
-  docker compose -p boaretail -f docker-compose-init.yml up -d
+  docker compose -p boaretail -f docker-compose-init.yml up --build -d
   echo "wait for dependencies to start ..."
   sleep 30
 fi
@@ -39,7 +39,7 @@ if [ $MODE = "build" ] || [ $MODE = "up" ]; then
   docker compose -p boaretail -f docker-compose-customer.yml build
 fi
 if [ $MODE = "up" ]; then
-  docker compose -p boaretail -f docker-compose-customer.yml up -d
+  docker compose -p boaretail -f docker-compose-customer.yml up --build -d
   echo "wait for actors to start ..."
   sleep 60
 fi

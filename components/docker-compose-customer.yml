@@ -5,7 +5,7 @@ services:
       - database
       - identity-provider
     ports:
-      - 9082:8082
+      - 10082:8082
     build:
       context: ./merchant
     env_file:
@@ -19,13 +19,13 @@ services:
       - hub-service
     ports:
       - 5006:5006
-      - 9084:8084
+      - 10084:8084
     build:
       context: ./customer
     env_file:
       - .env
     environment:
-      - HUB_URL=ws://hub-service:3010
+      - HUB_URL=ws://hub-service:10010
     hostname: customer
   cashier:
     depends_on:
@@ -33,7 +33,7 @@ services:
       - database
       - identity-provider
     ports:
-      - 9083:8083
+      - 10083:8083
     build:
       context: ./cashier
     env_file:
@@ -45,7 +45,7 @@ services:
       - database
       - identity-provider
     ports:
-      - 9085:8085
+      - 10085:8085
     build:
       context: ./advertiser
     env_file:
@@ -59,7 +59,7 @@ services:
       - database
       - identity-provider
     ports:
-      - 9086:8086
+      - 10086:8086
     build:
       context: ./vendor
     env_file:

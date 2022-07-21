@@ -2,7 +2,7 @@ services:
   redis:
     image: redis
     ports:
-      - "6379:6379"
+      - "16379:6379"
     hostname: redis
   database:
     image: mongo
@@ -18,14 +18,14 @@ services:
     hostname: db
   advertiser-service:
     ports:
-      - 4001:3001
+      - 10001:3001
     build:
       context: ./external/advertiser-service
   hub-service:
     depends_on:
       - redis
     ports:
-      - 4010:3010
+      - 10010:3010
     build:
       context: ./external/hub-service
     environment:
@@ -40,7 +40,7 @@ services:
         - database
       ports:
         - 5005:5005
-        - 9081:8081
+        - 10081:8081
       build:
         context: ./identity-provider
       env_file:
