@@ -102,7 +102,7 @@ chmod a+x run-retail.sh
 
 ![img.png](docs/programming/images/Getting-Started/Getting-Started-Browser-Docker-Compose-Open.png)
 
-Go to the browser and location http://localhost:4010.
+Go to the browser and location http://localhost:10010.
 
 Follow "Using the showcase retail application" instructions later in this document.
 
@@ -137,23 +137,28 @@ Note: if the file is not executable then run the following command.
 chmod a+x run-retail-k8s.sh
 ```
 
-
 Go to the browser and location http://localhost:30020.
 
 ## Using the showcase retail application
 
+Note: If you are rebuilding the application after the initial deployment clear tokens as shown below.
+
 Perform the following actions.
 1. View products upon first load
+
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Products.png)
 
 2. Click on a product to view and then choose close
+
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Product.png)
 
 3. Register
    1. Click Login
+   
  ![](docs/programming/images/Getting-Started/Getting-Started-Login.png)
 
    2. Click Register
+
  ![](docs/programming/images/Getting-Started/Getting-Started-Register.png)
 
 Create any name.
@@ -161,28 +166,48 @@ An anonymous user is entered in the database for this user.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Post-Register.png)
 
+4. Click on a product again
 
-
-   2. Click on a product again
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Product.png)
 
-   3. Add to cart
+5. Add to cart
+   
 ![](docs/programming/images/Getting-Started/Getting-Started-Add-Product.png)
 
+6. View shopping cart
 
-   4. View shopping cart
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Cart.png)
 
-   5. Checkout
+7. Checkout
+
 ![](docs/programming/images/Getting-Started/Getting-Started-Begin-Checkout.png)
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Checkout-in-progress.png)
 
-Click Ok.
+Click Ok or Close.
 
-6. View Order Confirmation
+8. View Order Confirmation
 
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Order-Confirmation.png)
+
+This is the end of a workflow through the retail showcase application.
+You can close the Order Confirmation now.
+
+## Resetting the environment.
+
+If you have already run through the tutorial and want to clear the environment perform the following steps.
+
+### Remove Anonymous User ID
+
+![](docs/programming/images/Getting-Started/Getting-Started-Clear-User-ID.png)
+
+Delete the stored User ID.
+
+### Clear User Token
+
+![](docs/programming/images/Getting-Started/Getting-Started-Clear-User-Token.png)
+
+Delete the two entries above.
 
 ## Tutorials
 - [Tutorial: Hello Actor](docs/programming/Tutorials-Hello-Actor.md)
@@ -199,30 +224,9 @@ Click Ok.
 - [Troubleshooting](docs/programming/Troubleshooting.md)
 - [Tips and Tricks](docs/programming/Tips-and-Tricks.md)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Key Contributers
 
 - [Tony Marius](https://www.linkedin.com/in/tony-marius-05a1898/) - original author, Technical Architect
 - [Paul Parrone](https://www.linkedin.com/in/paulparrone/) - author of Lush, Technical Architect
 - Bill Reeder - Cloud-Computing Architect
 
-## Links
-
-[Overview](docs/programming/Overview.md 'Overview')

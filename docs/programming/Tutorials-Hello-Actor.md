@@ -50,10 +50,12 @@ server:
 
 redis:
   host: localhost
-  port: 30389 #30389 for Kybernetes and 6379 for Docker Compose
+  port: 30389 #30389 for Kybernetes and 16379 for Docker Compose
 ```
 
-### Create Event Handler
+Note: Change the redis.port to 16379 if running in Docker Compose.
+
+### Create an Event Handler in the Trainee class
 
 ```java
     protected static Function<ArchitectureFirstEvent, Actor> hearMessageEvent = (event -> {
@@ -63,7 +65,7 @@ redis:
     });
 ```
 
-### Register Event Handler
+### Register Event Handler in the Trainee class
 
 ```java
     @Override
@@ -97,6 +99,8 @@ public class Trainee extends Actor {
 
 ### Create Message Event
 
+Create a com.architecture.first.boa.helloactor.events package and Create the following class.
+
 ```java
 package com.architecture.first.boa.helloactor.events;
 
@@ -108,8 +112,49 @@ public class MessageEvent extends ArchitectureFirstEvent implements AnonymousOkE
         super(source, from, to);
     }
 }
-
 ```
+
+### Add Component Scan to the Application
+
+#### The snippet below shows the Actor in the com.architecture.first package
+```java
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@ComponentScan(basePackages = "com.architecture.first")
+@SpringBootApplication
+public class HelloActorApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(HelloActorApplication.class, args);
+	}
+
+}
+```
+
+#### The snippet below shows the Actor in the com.example.boahello package
+```java
+package com.example.boahello;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@ComponentScan(basePackages = {
+        "com.architecture.first",
+        "com.example.boahello"
+})
+@SpringBootApplication
+public class BoaHelloApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BoaHelloApplication.class, args);
+    }
+
+}
+```
+Note: The Actor's path above is added to the Component Scan.
 
 ### Create Test Class
 
