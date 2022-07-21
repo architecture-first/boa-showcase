@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -o pipefail -e
 #NOTE: you may need to run this command as "sudo run-retail.sh" or change "docker" to "sudo docker"
-echo "Running ..."
+echo "Running ... "
 MODE=${1:-"build"}
 echo MODE=$MODE
 

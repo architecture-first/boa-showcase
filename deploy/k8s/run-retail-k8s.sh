@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -o pipefail -e
 #NOTE: you may need to run this command as "sudo run-retail-k8s.sh" or change "docker" to "sudo docker"
-echo "Running ..."
+echo "Running ... "
 echo "Arg= $1"
 MODE=${1:-"--install"}
 echo MODE=$MODE
