@@ -224,7 +224,7 @@ Delete the two entries above.
 - [Troubleshooting](docs/programming/Troubleshooting.md)
 - [Tips and Tricks](docs/programming/Tips-and-Tricks.md)
 
-## Key Contributers
+## Key Contributors
 
 - [Tony Marius](https://www.linkedin.com/in/tony-marius-05a1898/) - original author, Technical Architect
 - [Paul Parrone](https://www.linkedin.com/in/paulparrone/) - author of Lush, Technical Architect
