@@ -8,7 +8,7 @@ services:
     image: mongo
     container_name: db
     ports:
-      - 27017:27017
+      - 27027:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=Architecture
       - MONGO_INITDB_ROOT_PASSWORD=f1rst
