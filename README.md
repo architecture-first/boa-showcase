@@ -90,9 +90,14 @@ Open a Git Bash session.
 Change directory to the project root directory where the repository was cloned to.
 Next Change the directory to the 'deploy/docker' directory
 
-Run the following command: 
+Run the following command (may need to run as sudo if there are privileges issues): 
 ```shell
 $. ./run-retail.sh up
+```
+Note: if the file is not executable then run the following command.
+
+```shell
+chmod a+x run-retail.sh
 ```
 
 ![img.png](docs/programming/images/Getting-Started/Getting-Started-Browser-Docker-Compose-Open.png)
@@ -114,17 +119,24 @@ Open a Git Bash session.
 Change directory to the project root directory where the repository was cloned to.
 Next change directory to 'deploy/k8s'.
 
-Create a private Registry
+Create a private Registry (may need to run as sudo if there are privileges issues)
 
 ```shell
 docker run -d -p 5000:5000 --restart=always --name local-registry registry:2
 ```
 
-Run the following command.
+Run the following command (may need to run as sudo if there are privileges issues).
 
 ```shell
 $ bash run-retail-k8s.sh --build-and-install
 ```
+
+Note: if the file is not executable then run the following command.
+
+```shell
+chmod a+x run-retail-k8s.sh
+```
+
 
 Go to the browser and location http://localhost:30020.
 
