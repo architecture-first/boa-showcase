@@ -288,7 +288,7 @@ If a developer changes the access methods to the database it does not affect the
 This design is not limited to the BOA approach, but the BOA approach can lead to a simpler application structure.
 The BOA approach also lines up nicely with a company's organizational structure.
 
-## Backward Compatibility
+## Backward and Forward Compatibility
 
 For the sake of resilience, microservices should be designed in a backward and forward compatible fashion.
 The exception is if the previous application API was completely wrong and is producing results that must be fixed immediately.
@@ -301,6 +301,10 @@ Rollbacks become much easier with this strategy.
 
 Correspondingly, the 1.0.1. code should not break with a new parameter that it does not recognise.
 The code should merely log a warning that a field is not supported or ignore it altogether.
+
+Based on requirements and the project strategy, the Actor that does not understand a command can also put the message in a To-Do list or Queue for another Actor who understands the message to pick up and process.
+This is considered the Escalate Request technique.
+
 
 ![](images/Vision/boa-general-documentation-Vision-Backward-Compatibility.drawio.png)
 

@@ -14,10 +14,23 @@ The project is part of a Business Oriented Architecture and called BOA.
 
 ![](docs/programming/images/boa-general-documentation-BOA-Icon.drawio.png)
 
+It is important to understand that this is not an all or nothing architecture.
+This can and wants to coexist with existing applications and solutions.
+That is the real world.
+
+This approach is built to take advantage of the power of the Cloud-Centric environments.
+
+![](docs/programming/images/Vision/boa-general-documentation-Vision-Support.drawio.png)
+
+The only requirement is access to Redis for communication.
+It is built as a non-opinionated layer on top of existing cloud solutions.
+
 ## Overview
+
+It is recommended to view read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
-The installation instructions are based on Linux whether as the core operating system or Windows WSL 2.
+The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
 
 ## Installation
 
@@ -63,9 +76,9 @@ To get to the settings page, click the upper right corner of the windows
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Docker-Desktop-K8s.png)
 
-Enable Kubernetes in the settings.
+If you are planning to run in Kubernetes enable Kubernetes in the settings.
 
-### Install Minikube (or equivalent)
+### Optional: Install Minikube (or equivalent)
 
 Note: Use this option if you decide not to install Docker Desktop.
 
@@ -83,7 +96,7 @@ This is the easiest option if you don't know Kubernetes yet.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Git-Bash-Start.png)
 
-Open a Git Bash session.
+Open a Bash session, such as Git Bash.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Git-Bash-Deploy-Docker.png)
 
@@ -112,7 +125,7 @@ This option requires Kubernetes knowledge, but is preferred.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Git-Bash-Start.png)
 
-Open a Git Bash session.
+Open a Bash session, such as Git Bash.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Git-Bash-Deploy-K8s.png)
 
@@ -136,8 +149,9 @@ Note: if the file is not executable then run the following command.
 ```shell
 chmod a+x run-retail-k8s.sh
 ```
+Note: At this time, it may take 1-2 minutes for the Actors to register the first time.
+Wait 2 minutes then go to the browser and location http://localhost:30020.
 
-Go to the browser and location http://localhost:30020.
 
 ## Using the showcase retail application
 
@@ -224,5 +238,5 @@ Delete the two entries above.
 
 - [Tony Marius](https://www.linkedin.com/in/tony-marius-05a1898/) - original author, Technical Architect
 - [Paul Parrone](https://www.linkedin.com/in/paulparrone/) - author of Lush, Technical Architect
-- Bill Reeder - Cloud-Computing Architect
+- [Bill Reeder](https://www.linkedin.com/in/bill-reeder-98869b12/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3B246w9rHIQxWeEL38zcmFMg%3D%3D) - Cloud-Computing Architect
 

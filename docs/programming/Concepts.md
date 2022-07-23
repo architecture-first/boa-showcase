@@ -201,7 +201,7 @@ For instance, the showcase application performs caching by using a metaphor that
 ![](images/Concepts/boa-general-documentation-Concepts-Builtin-Caching.drawio.png)
 
 The developer can naturally code high performance code during initial development instead of waiting until there is a problem.
-For instance, the Merchant is coded to store highly accessed information in the Storefront (a.k.a. Redis cache).
+For instance, the Merchant is coded to store highly accessed information in the Storefront (e.g. Redis cache).
 It can safely do this if the Merchants are the main accessors to the database for products.
 The Merchants will be aware of any inventory changes.
 
@@ -235,10 +235,19 @@ As shown in previous sections, the Actors should closely resemble an actual user
 The Actor's logic should map to Use Cases.
 This will help define not only the happy path, but the exception path and produce logic to handle it.
 
-## Scalability
+## Extensibility and Grid Computing Support
+
+![](images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
 Actors can run in a Kubernetes cluster, a Docker Swarm, a Docker Compose environment, and a native environment that has access to the Redis Vicinity.
 In essence, the runtime model supports grid computing from any available platform.
+
+![](images/Vision/boa-general-documentation-Vision-Grid-Computing.drawio.png)
+
+The Vicinity is an environment that transcends the particular runtime environments.
+This is similar to accessing a database from various environments, except it is based on processing instead of data.
+Unlike the HTTP protocol communication, there is minimal setup to support this extensibility.
+Regardless, the usual networking security rules should apply.
 
 ## Robustness
 
