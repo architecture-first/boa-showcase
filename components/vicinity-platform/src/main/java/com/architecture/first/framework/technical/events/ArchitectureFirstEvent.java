@@ -621,6 +621,10 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public ArchitectureFirstEvent setOriginalEvent(ArchitectureFirstEvent originalEvent) {
         setRequestId(originalEvent.getRequestId());
         setOriginalEventName(StringUtils.isNotEmpty(originalEvent.originalEventName()) ? originalEvent.originalEventName(): originalEvent.name());
+        return initArchitectureFirstEvent(originalEvent);
+    }
+
+    private ArchitectureFirstEvent initArchitectureFirstEvent(ArchitectureFirstEvent originalEvent) {
         setAccessToken(originalEvent.getAccessToken());
         if (originalEvent.header().containsKey(BOA_CONN)) {
             addHeader(BOA_CONN, (String) originalEvent.header().get(BOA_CONN));
@@ -638,13 +642,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      */
     public ArchitectureFirstEvent initFromDefaultEvent(ArchitectureFirstEvent defaultLocalEvent) {
         setRequestId(defaultLocalEvent.getRequestId());
-        if (defaultLocalEvent.header().containsKey(BOA_CONN)) {
-            addHeader(BOA_CONN, (String) defaultLocalEvent.header().get(BOA_CONN));
-        }
-        if (defaultLocalEvent.header().containsKey(BOA_PROJECT)) {
-            addHeader(BOA_PROJECT, (String) defaultLocalEvent.header().get(BOA_PROJECT));
-        }
-        return this;
+        return initArchitectureFirstEvent(defaultLocalEvent);
     }
 
     /**

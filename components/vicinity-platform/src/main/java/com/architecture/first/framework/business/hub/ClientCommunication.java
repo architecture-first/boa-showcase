@@ -58,7 +58,7 @@ public class ClientCommunication {
      */
     private void sendMessage(String conn, SimpleModel payload) {
         payload.put("boa-conn", conn);
-        queue.push("Hub:messages", payload, SimpleModel.class);
+        queue.push("Hub-messages", payload, SimpleModel.class);
     }
 
     /**

@@ -18,13 +18,18 @@ const setupRedis = () => {
 let redisClient = setupRedis();
 
 const processPublishedMessages = () => {
-    redisClient.blPop("Hub:messages",0).then(
+    redisClient.blPop("Hub-messages",0).then(
         (data, item) => {
-            console.log("data=" + data);
-            let payload = JSON.parse(data.element);
-            let ws = webSockets[payload["boa-conn"]];
-            if (ws) {
-                ws.send(data.element)
+            if (data) {
+                console.log("data=" + data);
+                let payload = JSON.parse(data.element);
+                let ws = webSockets[payload["boa-conn"]];
+                if (ws) {
+                    ws.send(data.element)
+                }
+            }
+            else {
+                console.log("no data found for Hub-message")
             }
             process.nextTick(processPublishedMessages);
         }
