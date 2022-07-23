@@ -138,7 +138,7 @@
         <div id="orderConfirmationGrid" style="height: 100%; width:100%;" class="ag-theme-alpine"></div>
     </dialog>
 
-    <dialog id="suggestedProductsDialog" style="height: 500px; width: 600px;background-color: floralwhite; z-index: 18">
+    <dialog id="suggestedProductsDialog" style="top: 20%; left: 20%; height: 600px; width: 600px;background-color: floralwhite; z-index: 18">
         <div>
             <span id="suggestedProductsMessage" style="font-weight: bold; font-family: Arial">Lot's of people are buying these</span>
         </div>
@@ -636,6 +636,7 @@
 
                 // default col def properties get applied to all columns
                 defaultColDef: {sortable: false, filter: false},
+                height: '80%',
 
                 rowHeight: 300,
                 rowSelection: 'none', // allow rows to be selected
@@ -646,7 +647,7 @@
                 boa.suggested.suggestedProductsGridOptions.api.setRowData(suggestedProducts);
                 // bind (end)
 
-                boa.suggested.suggestedProductsDialog.showModal();
+                boa.suggested.suggestedProductsDialog.show();
             },
             init: () => {
                 new agGrid.Grid(boa.suggested.suggestedProductsGrid, boa.suggested.suggestedProductsGridOptions);
