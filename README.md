@@ -22,12 +22,12 @@ This approach is built to take advantage of the power of the Cloud-Centric envir
 
 ![](docs/programming/images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
-The only requirement is access to Redis for communication.
-It is built as a non-opinionated layer on top of existing cloud solutions.
+The only requirements for using this platform are access to Redis for communication and support for the messaging protocol.
+As shown above, the platform is a non-opinionated layer on top of existing cloud or on-prem solutions.
 
 ## Overview
 
-It is recommended to view read some of the documentation before installing.
+It is recommended to read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
 The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
