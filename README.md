@@ -184,9 +184,11 @@ An anonymous user is entered in the database for this user.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-View-Product.png)
 
-5. Add to cart
+5. Add to Cart
    
 ![](docs/programming/images/Getting-Started/Getting-Started-Add-Product.png)
+
+Close the Add to Cart window.
 
 6. View shopping cart
 
