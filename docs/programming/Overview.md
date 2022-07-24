@@ -7,8 +7,8 @@ There was a time when all processing was done on a mainframe against tapes.
 This evolved into two and three tier applications against relational databases.
 The next great leap was Web programming, which eliminated difficult deployment and support for client machines.
 
-The latest of the major industry changes is the move to the cloud.
-The cloud has removed many of the barriers of the 'on prem' environments and opened up new opportunities.
+The latest of the major industry changes is the move to the Cloud.
+The Cloud has removed many of the barriers of the 'on prem' environments and opened up new opportunities.
 Some of those opportunities include distributed computing, machine learning, high availability and the ability to create smarter programs.
 
 ## Classic Programming
@@ -41,8 +41,8 @@ There are also smart traffic lights that change timing based on live traffic.
 There is an ever-growing list of smart devices.
 The opportunities to provide added value for the user is better than ever before.
 
-There now exists a powerful platform for applications, nicknamed the cloud.
-The components in the cloud give us more opportunities to build applications that meet and exceed the users' expectations.
+There now exists a powerful platform for applications, nicknamed the Cloud.
+The components in the Cloud give us more opportunities to build applications that meet and exceed the users' expectations.
 
 We want to do more than produce a grid that a user uses to export data to Excel to do analysis only to input some data back into the system.
 We want to do the processing that the user exported the data for if possible.
@@ -92,14 +92,14 @@ The users most likely use multiple applications to get their work done.
 In modeling the Actor, we want to account for the entire workflow even if some processing will be done outside the new code for a period of time.
 There are business reuse opportunities with this approach.
 
-### Take advantage of a cloud-centric architecture
+### Take advantage of a Cloud-centric architecture
 
-Most people reading this already know some advantages of a cloud-centric architecture.
+Most people reading this already know some advantages of a Cloud-centric architecture.
 One of the major advantages is knocking down of walls between applications.
 This allows for reuse that was difficult before.
 
 Another advantage is the built-in grid computing support in platforms, such as Kubernetes.
-The cloud platforms make it easy for scaling up and scaling down machines without paying for idle CPUs.
+The Cloud platforms make it easy for scaling up and scaling down machines without paying for idle CPUs.
 
 ### Default to Asynchronous Communication
 
