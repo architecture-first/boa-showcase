@@ -13,7 +13,7 @@ Once, the Actors have been defined they can be slowly introduced into the showca
 
 ## Install Redis Commander
 
-Note: A prerequisite for installing [Redis](https://nodejs.org/en/) Commander is NodeJs unless Redis Commander is installed via Docker.
+Note: A prerequisite for installing Redis Commander is [NodeJs](https://nodejs.org/en/) unless Redis Commander is installed via Docker.
 [Redis Commander](https://www.npmjs.com/package/redis-commander) will help in interrogating the environment.
 
 It is especially helpful for viewing the Bulletin board, Convos, Ack/UnAck messages, and To-Do lists.
