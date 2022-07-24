@@ -263,7 +263,7 @@ You can close the Order Confirmation now.
 
 ## Monitoring
 
-To see the Bulletin board, Task lists and Convos, you can install [Redis Commander](Tips-and-Tricks.md#install-redis-commander).
+To see the Bulletin board, Task lists and Convos, you can install [Redis Commander](docs/programming/Tips-and-Tricks.md#install-redis-commander).
 
 ## Resetting the environment.
 
