@@ -108,7 +108,7 @@ The solution consists of the following components
     - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
 - **Browser** (from the user's desktop)
   - index.html
-    - Contains basic HTML5 and Javascript to demonstrate code to interact with BOA Actors.
+    - Contains basic HTML5 and JavaScript to demonstrate code to interact with BOA Actors.
       - This logic can be replaced with any library, such as Angular, React, Vue, Svelte, etc.
     - It is intentionally not focused on look and feel
       - This is just a showcase application.
