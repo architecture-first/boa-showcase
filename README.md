@@ -14,16 +14,20 @@ The project is part of a Business Oriented Architecture and called BOA.
 
 ![](docs/programming/images/boa-general-documentation-BOA-Icon.drawio.png)
 
-It is important to understand that this is not an all or nothing architecture.
-This can and wants to coexist with existing applications and solutions.
-That is the real world.
+It is important to understand that BOA is not an all or nothing architecture.
+The BOA approach can and wants to coexist with current applications and solutions.
+That is the real world and is welcomed.
 
-This approach is built to take advantage of the power of the Cloud-Centric environments.
+The BOA approach takes advantage of the power of the Cloud-Centric environments.
 
 ![](docs/programming/images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
-The only requirements for using this platform are access to Redis for communication and support for the messaging protocol.
-As shown above, the platform is a non-opinionated layer on top of existing cloud or on-prem solutions.
+The main requirements for using the BOA platform are access to Redis for core communication and support for the messaging protocol.
+As shown above, the platform is a non-opinionated layer on top of existing Cloud and On-Prem solutions.
+
+The storing of data and messaging are also not limited to using Redis.
+Redis is used for the base functionality, but the developers of custom Actor code are encouraged to use whatever storage locations that are appropriate.
+For instance a Library, can be stored in an AWS S3 Bucket or a mounted file system depending on the project.
 
 ## Overview
 
@@ -86,9 +90,61 @@ https://minikube.sigs.k8s.io/docs/start/
 
 ## Run the showcase retail application
 
-The is application contains running code based on the platform.
+The showcase retail application contains running code based on the platform.
 It should only be used for reference.
-You may choose to build your system from this code instead of starting from scratch.
+The solution consists of the following components
+
+- **MongoDB**
+  - This NoSql database fits nicely with a BOA approach
+    - Note: The BOA approach will work just as well with a relational database
+- **Redis**
+  - Redis is a comprehensive memory database for high performance access.
+    - Many objects are stored in Redis, but most can be stored in any storage repository
+      - The main items requiring Redis are the Bulletin board and the core messaging.
+- **NodeJS**
+  - The communication with the client occurs though a NodeJS application.
+    - The microservice manages the UI static content as well as the websockets per client.
+  - This component is not required for BOA applications, but shows a nice way to handle websocket communication with particular clients.
+    - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
+- **Browser** (from the user's desktop)
+  - index.html
+    - Contains basic HTML5 and Javascript to demonstrate code to interact with BOA Actors.
+      - This logic can be replaced with any library, such as Angular, React, Vue, Svelte, etc.
+    - It is intentionally not focused on look and feel
+      - This is just a showcase application.
+- Actors
+  - **Customer**
+    - Represents the User and interacts with the User's browser for communication
+      - It is connected to both the Vicinity and the Client.
+      - All users in this showcase application are **anonymous**
+        - The temporary information is stored in the LocalStorage and SessionStorage.
+  - **Merchant**
+    - Responsible for the product and inventory portion of the application.
+  - **Cashier**
+    - Responsible for accepting payment and processing orders.
+    - All payment and processing is faked for this showcase application
+  - **Identity Provider**
+    - Responsible for providing a valid Access Token (JwtToken).
+  - **Security Guard**
+    - Responsible for validating messages and reporting security incidents
+  - **Vendor**
+    - Delivers supplies for updating inventory
+  - **Advertiser**
+    - Produces advertisements based on data analysis
+    - This Actor represents dynamic behavior without custom Java coding
+      - It executes based on a developer defined script and interacts with a sidecar component for custom processing
+- Messages
+  - **business-retail**
+    - The repository of ArchitectureFirst events for communication in the application.
+      - There should be a custom business library per application type.
+- Platform
+  - **vicinity-platform**
+    - The runtime that defines the Vicinity and Actors base functionality
+    - This library will be kept in a Maven Repository in the near future.
+
+
+You can take this application and modify it for your particular application.
+Alternatively, you may choose to build your system from scratch by just using the vicinity-platform library.
 
 ### Docker Compose
 
