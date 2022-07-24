@@ -76,7 +76,7 @@ An example command is shown below on a redis image named redis-cli.
 kubectl exec -it redis-cli -- redis-cli -h boa-retail-redis-service -p 6389
 ```
 
-The alternative is to use Redis Commander.
+The alternative is to use [Redis Commander](Tips-and-Tricks.md#install-redis-commander).
 
 ![](images/Troubleshooting/Troubleshooting-Actor-Availability.png)
 

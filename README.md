@@ -205,6 +205,10 @@ Close the Add to Cart window.
 This is the end of a workflow through the retail showcase application.
 You can close the Order Confirmation now.
 
+## Monitoring
+
+To see the Bulletin board, Task lists and Convos, you can install [Redis Commander](Tips-and-Tricks.md#install-redis-commander).
+
 ## Resetting the environment.
 
 If you have already run through the tutorial and want to clear the environment perform the following steps.

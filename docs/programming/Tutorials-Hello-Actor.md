@@ -205,6 +205,7 @@ Note: A whisper is a message that stays in the personal space (a.k.a Container)
 ![](images/Tutorials/Hello-Actor/Tutorials-Hello-Actor-Bulletin-board.png)
 
 You will notice that the Trainee has registered with the Bulletin board.
+Please follow instructions on installing Redis Commander [here](Tips-and-Tricks.md#install-redis-commander).
 
 ## Tutorials
 - [Next Tutorial: Merchant Convo](Tutorials-Merchant-Convo.md)

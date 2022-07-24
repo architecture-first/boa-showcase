@@ -13,7 +13,24 @@ Once, the Actors have been defined they can be slowly introduced into the showca
 
 ## Install Redis Commander
 
+Note: A prerequisite for installing [Redis](https://nodejs.org/en/) Commander is NodeJs unless Redis Commander is installed via Docker.
 [Redis Commander](https://www.npmjs.com/package/redis-commander) will help in interrogating the environment.
+
+It is especially helpful for viewing the Bulletin board, Convos, Ack/UnAck messages, and To-Do lists.
+
+To Run Redis Commander for local Docker Compose via NodeJs issue the following command:
+
+```shell
+npx redis-commander -p 9901 --redis-port 16379
+```
+
+To Run Redis Commander for local Kubernetes via NodeJs issue the following command:
+
+```shell
+npx redis-commander -p 9901 --redis-port 30389
+```
+
+![](images/Tips-And-Tricks/Tips-And-Tricks-Redis-Commander.png)
 
 ## Pay attention to the Request ID
 

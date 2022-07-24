@@ -26,7 +26,7 @@ Run the Actor's process.
 
 ![](images/Special-Features/Special-project.png)
 
-View the bulletin board to see when Actor is ready to receive messages.
+View the bulletin board (via [Redis Commander](Tips-and-Tricks.md#install-redis-commander)) to see when Actor is ready to receive messages.
 This is the case where the Actor's status is "Active" and "running".
 We are looking for the 'holiday01' project Actor.
 
