@@ -98,25 +98,25 @@ Most people reading this already know some advantages of a Cloud-centric archite
 One of the major advantages is knocking down of walls between applications.
 This allows for reuse that was difficult before.
 
-Another advantage is the built-in grid computing support in platforms, such as Kubernetes.
+Another advantage is the built-in grid-computing support in platforms, such as Kubernetes.
 The Cloud platforms make it easy for scaling up and scaling down machines without paying for idle CPUs.
 
 ### Default to Asynchronous Communication
 
 Asynchronous communication allows for long-running tasks without the timeout issues.
 An example of this communication is the 'publish/subscribe' model.
-This technique is easier to scale and does not require a front load balancer at each step.
+This technique is easier to scale and does not require a front load balancer for each endpoint.
 
 With the async approach, it is recommended that the actor pushes information to the client.
 To facilitate this on the browser, the standard approach uses websockets.
 
 ### Peer to Peer Communication
 
-Instead of the standard request/response communication, the BOA approach is to use peer-to-peer communication.
+Instead of the standard request/response communication, the BOA approach uses peer-to-peer communication.
 This communication path runs both ways and not unidirectional.
 
 Even though there appears to be more coupling than the unidirectional approach, there is not because the interaction is essentially with an interface.
-The distributed strategy is talked about further throughout the document.
+This distributed strategy is discussed further throughout the document.
 
 ![](images/boa-general-documentation-Communication.drawio.png)
 
@@ -147,8 +147,8 @@ The goal is to continue to grow to allow for more available resources.
 
 ![](images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
-The platform will run on any of the environments shown in the image above.
-The preferred runtime environment is Kubernetes or Docker Swarm because of the grid computing capabilities.
+The platform will run on any of the environments in gray shown in the image above.
+The preferred runtime environment is Kubernetes or Docker Compose/Swarm because of the grid-computing capabilities.
 But, since the Actor is just a running process, it can run directly on a VM, desktop or another environment.
 
 The key platform that ties the Vicinity together is Redis.
@@ -176,10 +176,10 @@ We will expect this Actor to hit the ground running and provide useful work just
 And if performing machine learning or similar then training is expected.
 
 The BOA concept mentions machine learning and AI, but it is not required.
-The only thing required is to follow the principles of robustness and Actor focused logic.
+It is only required to follow the principles of robustness and Actor focused logic.
 
 In the scenario above, a GerbalTax Accountant is employed for an application.
-It is expected that a UI can be attached to this Actor, or that it comes with a built in interface.
+It is expected that a UI can attach to this Actor, or that it comes with a built in interface.
 There should be minimal installation required to use it.
 
 ### Smart Actor
@@ -193,7 +193,7 @@ This path is often poorly defined and tested.
 
 The smart Actor should support a variety of inputs and be easy to work with.
 This is the same way we feel about coworkers.
-That is our standard.
+That is our standard to code to.
 
 In the top diagram above, the Accountant was written in a limited fashion where it only supports XML.
 This helped out the developers, because they had less to do, but it made reuse very difficult.
@@ -212,10 +212,12 @@ Let's write applications to this standard.
 
 <a href="https://tmaiapps.z13.web.core.windows.net/maze.html" target="_blank">![](images/Vision/Vision-AI-Maze.png)</a>
 
-The image above links to an AI Maze based on the same concepts supported in teh platform.
-The Actors are built to be as smart as ants and will navigate a moving maze.
+The image above links to an AI Maze based on the same concepts supported in the platform.
+The Actors are built to be as smart as ants and will navigate through a moving maze.
 They can see the information necessary to make decisions.
 They are smart and will work properly in any maze that provides the API that they use.
+
+Giving Actors the runtime information they need to process correctly is another principle in this approach.
 
 Applications can be this smart.
 This can eliminate many headaches that are due to integration with fragile happy path endpoints.
@@ -225,13 +227,13 @@ This can eliminate many headaches that are due to integration with fragile happy
 The platform strategy generally adheres to the 12-Factor App Principles of microservices
 
 - Dependencies (Explicitly declare and isolate the dependencies)
-  - _The dependencies are based on Actors defined in the business design_
+  - _The dependencies are based on Actors defined in the business design step_
 - Config (Store configurations in an environment)
   - _This is the default in a containerized environment_
 - Backing Services (treat backing resources as attached resources)
   - _Not only are the resources treated as attachments, they are conformed to a business metaphor to make it simpler_
 - Build, release, and Run (Strictly separate build and run stages)
-  - _The runtime is based on images that are built earlier and employed from a container repository_
+  - _The runtime is based on images that are built earlier and employed from a image repository_
 - Processes (execute the app as one or more stateless processes)
   - _The Actors are essentially stateless, but may contain caching information in memory._
     - _This will not hurt the system, because if an Actor goes down another can still serve the request._
@@ -241,14 +243,14 @@ The platform strategy generally adheres to the 12-Factor App Principles of micro
 - Concurrency (Scale out via the process model)
   - _Scaling in the platform can occur inside or outside Kubernetes_
 - Disability (maximize the robustness with fast startup and graceful shutdown)
-  - _The Actors communicate then they have validated the environment and are ready for processing._
+  - _The Actors communicate when they have validated the environment and are ready for processing._
     - _They shut down after processing their last requests and notify the Vicinity so that other Actors can take up new work._
 - Dev/prod parity (Keep development, staging, and production as similar as possible)
   - _The Actor is based on an image that is the same in all environments._
 - Logs (Treat logs as event streams)
   - _This is an inherent feature of Docker and Kubernetes_
 - Admin processes (Run admin/management tasks as one-off processes)
-  - _The environment supports a combination of cron jobs and self initiated activities at the Actor thread level._
+  - _The environment supports a combination of cron jobs and self-initiated activities at the Actor thread level._
 
 As stated above, many of these goals are achieved using the Kubernetes/Docker containerized solutions.
 
@@ -282,7 +284,7 @@ There is little upside to this microservice split.
 ### Actor-based Microservice
 
 In the bottom diagram, the service is split by actor role. 
-Since a Merchant deals with both Orders and Products, it can access the database without the complexity of service to service communication.
+Since a Merchant deals with both Orders and Products, it can access the database without the complexity of service-to-service communication.
 If a developer changes the access methods to the database it does not affect the caller.
 
 This design is not limited to the BOA approach, but the BOA approach can lead to a simpler application structure.
@@ -299,8 +301,8 @@ There should be a policy to honor X number of versions of code and gradually dep
 This will aid the Blue/Green deployment where a new generation and old generation can run together for a period of time.
 Rollbacks become much easier with this strategy.
 
-Correspondingly, the 1.0.1. code should not break with a new parameter that it does not recognise.
-The code should merely log a warning that a field is not supported or ignore it altogether.
+Correspondingly, the 1.0.1. code should not break with a new parameter that it does not recognize.
+The code should log a warning that a field is not supported or ignore it altogether.
 
 Based on requirements and the project strategy, the Actor that does not understand a command can also put the message in a To-Do list or Queue for another Actor who understands the message to pick up and process.
 This is considered the Escalate Request technique.
@@ -309,7 +311,7 @@ This is considered the Escalate Request technique.
 ![](images/Vision/boa-general-documentation-Vision-Backward-Compatibility.drawio.png)
 
 The key to backward compatibility is to fashion the code to handle features for a period of time.
-In the diagram above, there are two version of the merchant as well as 2 versions of the Customer.
+In the diagram above, there are two version of the Merchant as well as 2 versions of the Customer.
 We want to welcome this instead of constantly fighting this situation with the standard versioning techniques.
 
 The Merchant 1.0.2 has some new feature, and it also involved a database change.
@@ -329,6 +331,9 @@ The Customer is still served even though some new features are not returned.
 If Customer 1.0.1 interacts with Merchant 1.0.2 without the new Season field Merchant 1.0.2 should not fail.
 It should behave the same way Merchant 1.0.1 would and return the data in the previous release format.
 This can be achieved by including Merchant 1.0.1 code in Merchant 1.0.2 or running both simultaneously.
+
+An exception to this philosophy is the situation where the new field must be supported or the results are invalid.
+In this case, the Actors handling mismatched message versions should return an error or attempt to pass off to an Actor of the proper version.
 
 ## Links
 - [Concepts](Concepts.md)
