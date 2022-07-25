@@ -4,7 +4,7 @@ metadata:
   name: boa-retail-redis-service
 spec:
   type: NodePort
-  clusterIP: 10.111.222.121
+#  clusterIP: 10.100.222.121
   ports:
     - port: 6389
       name: redis-svc-port
