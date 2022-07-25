@@ -10,7 +10,7 @@ The Actor should attempt to do the same if possible.
 Of course, the exception to this rule is something like a banking transaction that must complete fully or be rolled back.
 
 The developer should build the Actor with the level of intelligence that is appropriate based on the business and technical vision.
-At the low end, an Actor can be a renamed microservice with an asynchronous API.
+At the low end, an Actor can simply be a renamed microservice with an asynchronous API.
 At the high end, the Actor may contain machine learning logic and other capabilities.
 
 There is a reason developers like tools like IntelliJ.
@@ -73,7 +73,7 @@ A developer can add custom behavior to any Actor to perform Machine Learning or 
 
 ### Communication
 
-When Actors communicate it is considered a conversation or a Convo.
+When Actors communicate it is considered a conversation called a Convo.
 
 #### Say
 
