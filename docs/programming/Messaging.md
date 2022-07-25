@@ -32,7 +32,7 @@ It is ok to have properties outside the header and the payload as long as there 
 | requestId   | A generated ID to represent the conversation or Convo                                                                                               |
 | jwtToken    | An expirable token containing information for accessing the system. It is up to the system designers to determine what needs an access token or not |
 | boa-conn    | A connection string for communication with the client, such as websockets                                                                           |
-| boa-project | A project name for an actor to receive specific messages.  Default is 'defautl'.                                                                    |
+| boa-project | A project name for an actor to receive specific messages.  Default is 'default'.                                                                    |
 | originalEventName    | The name of the starting event in a Convo                                                                                                           |
 
 
@@ -68,7 +68,7 @@ Note: In the diagram above, the events are showing just the header information.
 As the first step, the Customer creates and says a message (ViewProductEvent).
 Due to the framework, most of the header information shown is automatically supplied in the creation of the ViewProductEvent.
 
-The important item, called requestId, is highlighted.
+The important item, called requestId, is highlighted in yellow.
 This key field links the Convo and Task list together.
 
 When the Merchant hears the message it creates a ViewProductReplyEvent.
@@ -105,17 +105,19 @@ The requestId is tracked in 4 objects
         ErrorAfterReceivedByActor ("ErrorAfterReceivedByActor");
 ```
    The Convo statuses help for troubleshooting in the asynchronous environment.
+
 4. Tasklist - The list of tasks as part of a use case that are performed by the participating actors.
+
 ![](images/Messaging/View-Product-Tasklist.png)
    1. The Tasklist shows the steps of the use case as they are being worked on.
-   2. There are extra items, such as SuggestProducts because the Actor proactively contacted the Customer during the ViewProduct use case.
+   2. There are extra items in the Task list above, such as SuggestProducts because the Actor proactively contacted the Customer during the ViewProduct use case.
 
 ```java
     @TaskTracking(task = "merchant/ShowProduct", defaultParentTask = "customer/ViewProduct")
     public CartItem showProduct(ViewProductEvent event) {
 ```
 In order to participate in a Task list, the method must be decorated with a TaskTracking annotation.
-The first parameter must also be an ArchitectureFirst event.
+The first parameter must be an ArchitectureFirst event.
 
 ## Links
 
