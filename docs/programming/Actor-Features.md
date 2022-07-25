@@ -255,6 +255,262 @@ In the showProduct method, the Actor will proactively suggest products to the ca
 This is a benefit of the conversational approach.
 More can be accomplished in a Convo than can be done in a one way request/response approach, unless the request/response has a heavy payload.
 
+**Note**: If an Actor does not understand an Event, meaning there is no handler registered for the event it replies with an ActorDoesNotUnderstandEvent.
+
+### Thinking
+
+The basic thinking on an Actor is straight-forward and not AI driven.
+
+The Actor performs the following overridable behavior based on an internal schedule.
+
+#### Do Once
+
+```java
+    /**
+     * Perform the one time action
+     */
+    protected void onDoOnce() {
+        //... override
+    }
+```
+The Actor performs a task one time when it starts.
+
+#### Do every __ minutes
+
+```java
+    /**
+     * Perform processing every 30 minutes
+     */
+    protected void on30min() {
+        // override for specific behavior
+        if (logic.existsFor30min()) {
+            applyLogic("30min");
+        }
+    }
+
+    /**
+     * Perform processing every hour
+     */
+    protected void on60min() {
+        recordNotes();
+        if (logic.existsFor60min()) {
+            applyLogic("60min");
+        }
+    }
+
+    /**
+     * Perform processing every 12 hours
+     */
+    protected void on12hours() {
+        // override for specific behavior
+        if (logic.existsFor12hours()) {
+            applyLogic("12hours");
+        }
+    }
+
+    /**
+     * Perform processing every 24 hours
+     */
+    protected void on24hours() {
+        // override for specific behavior
+        if (logic.existsFor24hours()) {
+            applyLogic("24hours");
+        }
+    }
+```
+
+The Actor performs actions for every interval above.
+For instance, on30min is called every 30 minutes.
+
+#### Check Health
+
+The Actor checks the health of itself and the environment every minute.
+This assures the environment is healthy for processing.
+
+```java
+    /**
+     * Check the health of the Agent and the Vicinity.
+     * Terminate if unhealthy
+     */
+    protected void checkHealth() {
+        if (!isHealthOk()) {
+            onTerminate("self health not ok for: " + name());
+        }
+
+        if (!isVicinityHealthOk()) {
+            onTerminate("vicinity connections are stale for: " + name());
+        }
+
+        if (!isEnvironmentOk()) {
+            onTerminate("environment is invalid for: " + name());
+        }
+
+        giveStatus((!isAway)
+                ? BulletinBoardStatus.Status.Active
+                : BulletinBoardStatus.Status.Away, "running");
+    }
+```
+
+The snippet above shows the Actor checking the health.
+If the situation is not healthy the Actor will self-Terminate to get the attention of monitoring tools.
+In some situations, the Actor will re-instantiate itself.
+
+If everything is Ok, the Actor will give its status as running.
+
+#### Proactivity
+
+Every minute (a.k.a. pulse), the Actor will look for work if there is possible work to do.
+
+```java
+    /**
+     * Perform proactive tasks
+     */
+    protected void onThink() {
+        // Perform periodic processing
+        if (isMyTurn()) {
+            doMyWork();
+        }
+
+        handleUnacknowledgedEvents();
+        lookForWork();
+    }
+```
+
+In the snippet above, the Actor checks to see if it is its turn to process work.
+If so the Actor will perform work for the given group.
+
+The Actor will also look for unacknowledged events to process them.
+These events include To-Do tasks.
+
+### Other Callbacks
+
+There are additional callbacks that have base logic but can be overriden.
+It is recommended to call the base class method when overriding and add additional logic.
+
+#### On Actor Entered
+
+```java
+    /**
+     * Perform an action when an actor of the same group enters the Vicinity
+     * @param event
+     */
+    public void onActorEntered(ActorEnteredEvent event) {
+        // ... override for different behavior
+        if (StringUtils.isNotEmpty(JOIN_TOKEN) && JOIN_TOKEN.equals(event.getJoinToken())) {
+            if (StringUtils.isNotEmpty(OVERRIDE_TOKEN) && OVERRIDE_TOKEN.equals(event.getOverrideToken())) { // allow another Actor to take the work
+                log.warn(String.format("Actor %s is standing down due to override request from %s", name(), event.from()));
+                giveStatus(BulletinBoardStatus.Status.Away, "standing down");
+                isAway = true;
+            }
+        }
+    }
+```
+
+This method represents a notification of an Actor entering the Vicinity.
+The method has default behavior to support a JOIN group where all Actors contain a common token.
+This allows for an Actor to override other Actors in the group and process all messages.
+It must be announced.
+
+#### On Actor Resume
+
+```java
+    /**
+     * Resume activities if standing down
+     * @param event
+     */
+    public void onActorResumeRequest(ActorResumeEvent event) {
+        // ... override for different behavior
+        if (StringUtils.isNotEmpty(JOIN_TOKEN) && JOIN_TOKEN.equals(event.getJoinToken())) {
+            if (StringUtils.isNotEmpty(OVERRIDE_TOKEN) && OVERRIDE_TOKEN.equals(event.getOverrideToken())) { // allow another Actor to take the work
+                log.warn(String.format("Actor %s is resuming down due to request from %s", name(), event.from()));
+                giveStatus(BulletinBoardStatus.Status.Active, "running");
+                isAway = false;
+            }
+        }
+    }
+```
+
+This method will reinstate actors that stood down on request.
+It must be announced.
+
+#### On Error
+
+```java
+    public void onError(String message) {
+        ...
+    }
+```
+
+This method handles an error that is not based on an event or exception.
+The default logic is to log the error in the Actor's log location.
+
+
+#### On Exception
+
+```java
+    public void onException(ActorException exception, String message) {
+        ...
+    }
+    public void onException(ArchitectureFirstEvent event, ActorException exception, String message) {
+        ...
+    }
+```
+
+This method handles an exception during the Actor's processing.
+By default, the exception is logged, sent to the Vicinity Monitor and the original Actor.
+
+#### On Unhandled Event
+
+```java
+    @Override
+    protected void onUnhandledEvent(ArchitectureFirstEvent event) {
+        // .. override to handle
+        log.warn("unhandled event: " + event.toString(), event);
+    }
+```
+
+This method allows for custom behavior if an event is not handled or understood by the target Actor.
+
+
+#### On Actor Processing Error
+
+```java
+    @Override
+    protected void onActorProcessingError(ActorProcessingErrorEvent event) {
+        var msg = event.message();
+        log.error(msg);
+
+        if (msg.contains("Exception:")) {   // Return a technical support message
+            msg = String.format("%s %s.  Please contact the technical support team",
+                    (StringUtils.isNotEmpty(event.getRequestId())) ? "RequestId: " + event.getRequestId() : "",
+                    (event.getTarget().isPresent() ? "/ " + event.getTarget().get().name() : "")
+            );
+        }
+        var clientEvent = new DefaultLocalEvent(event.getRequestId())
+                .setOriginalEvent(event)
+                .setTo(CLIENT)
+                .setFrom(name());
+        clientEvent.payload().put("error", msg);
+        clientEvent.payload().put("status", 505);
+        client.say(clientEvent);
+    }
+```
+
+This method is called when there is an error during processing of a Convo.
+The snippet above is from the Customer that will intelligently interrogate the message and inform the client user.
+
+
+#### On Terminate
+
+```java
+    @Override
+    protected void onTerminate(String reason) {
+        ...
+    }
+```
+
+This method is called to allow an Actor to gracefully terminate.
+
 ## Links
 - [Overview](Overview.md 'Overview')
 - [Concepts](Concepts.md)
