@@ -496,7 +496,7 @@ This method allows for custom behavior if an event is not handled or understood 
     }
 ```
 
-This method is called when there is an error during processing of a Convo.
+This method is called when there is an error during processing in a Convo.
 The snippet above is from the Customer that will intelligently interrogate the message and inform the client user.
 
 

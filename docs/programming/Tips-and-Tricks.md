@@ -8,7 +8,7 @@ This document contains a list of tips and tricks to effectively use the platform
 
 ## Use the platform as a starting point.
 
-It is recommended to modify the showcase retail platform to match the desired architecture.
+It is recommended to modify the showcase retail platform to match your desired architecture.
 Once, the Actors have been defined they can be slowly introduced into the showcase application and the irrelevant Actors replaced.
 
 ## Install Redis Commander
@@ -85,7 +85,7 @@ boa-retail-redis-service:6389> hgetall "jnfY3HUadTvmwfOqwZod/Tasklist:customer/V
 14) "{\"status\":\"Complete\",\"message\":\"Customer.default.1.0.2.93864d44-f785-4229-81cb-4492f597d302\",\"timeStamp\":\"2022-07-19T21:01:53.883379397Z[GMT]\"}"
 ```
 
-The task list above shows the interactions for the task.
+The Task list above shows the interactions for the task.
 
 ```shell
 boa-retail-redis-service:6389> hgetall  "jnfY3HUadTvmwfOqwZod/Convo"
@@ -110,11 +110,11 @@ boa-retail-redis-service:6389> hgetall "BulletinBoard:topic/VicinityStatus/Merch
 2) "{\"status\":\"Active\",\"subject\":\"status\",\"message\":\"running\",\"timestamp\":\"2022-07-19T21:13:00.026944684Z[GMT]\"}"
 ```
 
-The bulletin board shows that the Actor with the expected ID is running and has a recent timestamp.
+The Bulletin board shows that the Actor with the expected ID is running and has a recent timestamp.
 
 ## If Redis is not available the Actors react
 
-By default, if Redis is not available, the Actors will notice by their health check every minute.
+By default, if Redis is not available, the Actors will notice by their periodic health check.
 
 ```java
     /**

@@ -11,14 +11,14 @@ In keeping with the human metaphor, the version is called a generation.
 
 In the diagram above, both generations of the Merchant exist in the Vicinity.
 By default, the messages will alternate in a round-robin fashion.
-This scenario can support a form of A/B testing where a percentage of messages will be sent to the new generation and the rest to the other generation for a slow rollout.
+This scenario can support a form of Canary deployment or A/B testing where a percentage of messages are sent to the new generation and the rest to the other generation for a slow rollout.
 
 ### Blue/Green deployment
-Blue/Green deployment is supported by using the boa-project attribute
+Blue/Green deployment is supported by using the _boa-project_ attribute
 
 ![](images/Special-Features/Special-project-debugger.png)
 
-Define the project variable in the debugger or deployment yaml if Docker or Kubernetes.
+Define the project variable in the debugger or deployment yaml if using Docker or Kubernetes.
 
 ![](images/Special-Features/Merchant-project-running.png)
 
@@ -26,32 +26,32 @@ Run the Actor's process.
 
 ![](images/Special-Features/Special-project.png)
 
-View the bulletin board (via [Redis Commander](Tips-and-Tricks.md#install-redis-commander)) to see when Actor is ready to receive messages.
+View the bulletin board (via [Redis Commander](Tips-and-Tricks.md#install-redis-commander)) to see when the Actor is ready to receive messages.
 This is the case where the Actor's status is "Active" and "running".
-We are looking for the 'holiday01' project Actor.
+In this case, we are looking for the 'holiday01' project Actor.
 
 ![](images/Special-Features/browser-project.png)
 
-Add the boa-project with the desired name to the URL.
+Add the _boa-project_ with the desired name to the URL.
 
 ```java
             if (Utilities.project()) {
-                httpSettings.headers["boa-project"] = Utilities.project();
+                httpSettings.headers["boa-project"] = Utilities.project(); // get from query params
             }
             const response = await fetch('/api/customer/checkout', httpSettings);
 ```
 
-For a REST call, add the entry to the headers and call any Actor with the project 'holiday01'.
+For a REST call, add the entry to the headers list and call any Actor while passing the project 'holiday01'.
 
-If the communication is using a message instead the boa-project attribute must be added the Event header.
+If the communication medium is a message instead the _boa-project_ attribute must be added the Event header.
 
-When the steps are complete, the messages with the boa-project attribute will route to Actors with the corresponding value.
+When the steps are complete, the messages with the _boa-project_ attribute will route to Actors with the corresponding value.
 If no Actor with the attribute value is found the message will route to one of the default project Actors.
 
 
 ## Overriding
 
-Overriding works similar to the boa-project behavior except conversations will not alternate with other Actors.
+Overriding works similar to the _boa-project_ behavior except conversations will not alternate with other Actors.
 The other Actors will move their statuses to "Away" and stand down until a message is sent to resume.
 
 ```java
@@ -115,7 +115,7 @@ spec:
                   name: boa-env
                   key: OVERRIDE_TOKEN
 ```
-This snippet shows the original configuraton of the Merchant.
+This snippet shows the original configuration of the Merchant.
 Notice the JOIN_TOKEN and OVERRIDE_TOKEN configured for the pod.
 
 
@@ -133,13 +133,13 @@ The diagram above shows a Kubernetes layout.
 As desired, each pod has one main Actor (minus the Security Guard).
 The Actor is part of the BOA platform and requires a developer to install the vicinity-platform and write Java code to use it. 
 
-There are some situations where there is existing code and the goal is merely to interact the existing code with the platform.
+There are some situations where there is existing code and the goal is merely to interact with the BOA platform.
 The Dynamic Actor helps with this approach.
-The Dynamic Actor is built to be downloaded as an image and then scripted to communicate with a sidecar or other Actors without Java coding.
-Therefore, the sidecar service can be written in a another language.
+The Dynamic Actor is built to be downloaded as an image and then scripted to communicate with a sidecar or other Actors without custom Java coding.
+The sidecar service can be written in another language and needs to define a REST interface.
 
 The early version is limited and only supports a few commands, but will grow in the future.
-The ideal state is to download existing Actors into a Kubernetes cluster or Docker Swarm without the need to compile.
+The ideal vision is to download existing Actors into a Kubernetes cluster or Docker Swarm without the need to compile.
 
 An example of the current script is shown below.
 

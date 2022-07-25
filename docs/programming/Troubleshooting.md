@@ -49,7 +49,7 @@ istening for transport dt_socket at address: 5006
 ```
 
 The last line above shows the generation as 1.0.1 and the default project. 
-Make sure that the results of the log matches with the generation in the code.
+Make sure that the results of the log match with the generation in the code.
 
 ```java
     public Customer(CustomerRepository repository, ClientCommunication client) {
