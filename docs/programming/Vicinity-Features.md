@@ -24,8 +24,8 @@ Unless specified otherwise, the target Actor will acknowledge any message that i
 
 ![](images/boa-general-documentation-Conversation.drawio.png)
 
-One or more Actors can participate in a Conversation.
-Each conversation is linked together by a common request ID.
+One or more Actors can participate in a Conversation called a Convo.
+Each Convo is linked together by a common request ID.
 
 ## Task list
 
@@ -38,8 +38,8 @@ Each Actor updates the status when they are finished with their tasks.
 
 ![](images/boa-general-documentation-TODO.drawio.png)
 
-If an Actor has a problem communicating with an intended Actor it can place the request in a To-Do list.
-Another Actor of the same group will monitor the list and process the request instead.
+If an Actor has a problem communicating with an intended Actor it can place the message in a To-Do list.
+Another Actor of the same group will monitor the list and process the message instead.
 This strategy can help prevent message loss.
 
 ## Bulletin board
@@ -47,7 +47,7 @@ This strategy can help prevent message loss.
 ![](images/boa-general-documentation-Bulletin-board.drawio.png)
 
 The bulletin board is used to find Actors to communicate with to accomplish tasks.
-The available Actors continually update their statuses on the bulletin board.
+The available Actors continually update their statuses on the Bulletin board.
 If an Actor no longer updates its status to running it will be removed from the Active board and will no longer receive messages.
 
 As shown in the diagram, Actors of different versions can work together.
