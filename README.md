@@ -34,9 +34,12 @@ For instance a Library, can be stored in an AWS S3 Bucket or a mounted file syst
 It is recommended to read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
-The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
+## Demo version
+
+A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
 
 ## Installation
+The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
 
 ### Install Java 17
 
@@ -183,6 +186,12 @@ Note: if the file is not executable then run the following command.
 chmod a+x run-retail.sh
 ```
 
+**Alternative**: if deploying to a server as docker-compose outside of docker desktop
+
+```shell
+sudo ./run-retail-alt-1.sh up
+```
+
 ![img.png](docs/programming/images/Getting-Started/Getting-Started-Browser-Docker-Compose-Open.png)
 
 Go to the browser and location http://localhost:10010.
@@ -222,6 +231,7 @@ chmod a+x run-retail-k8s.sh
 Note: At this time, it may take 1-2 minutes for the Actors to register the first time.
 Wait 2 minutes then go to the browser and location http://localhost:30020.
 
+**Alternative**: if deploying to a server, you can create a custom script to compile java, build images and deploy via Kustomize.
 
 ## Using the showcase retail application
 

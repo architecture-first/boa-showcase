@@ -2,11 +2,13 @@ version: "3"
 services:
   redis:
     image: redis
+    restart: always
     ports:
       - "6379:6379"
     hostname: redis
   database:
     image: mongo
+    restart: always
     ports:
       - 27027:27017
     environment:
@@ -17,11 +19,13 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     hostname: db
   advertiser-service:
+    restart: always
     ports:
       - 10001:3001
     build:
       context: ./external/advertiser-service
   hub-service:
+    restart: always
     depends_on:
       - redis
     ports:
@@ -35,17 +39,19 @@ services:
       - ROOT_PATH=/usr/src/app/ui-customer
       - DEBUG=http,router,express:*
   identity-provider:
-      depends_on:
-        - redis
-        - database
-      build:
-        context: ./identity-provider
-      env_file:
-        - .env
-      environment:
-        - TASKLIST_ROOT_PATH=none
-      hostname: identity-provider
+    restart: always
+    depends_on:
+      - redis
+      - database
+    build:
+      context: ./identity-provider
+    env_file:
+      - .env
+    environment:
+      - TASKLIST_ROOT_PATH=none
+    hostname: identity-provider
   merchant:
+    restart: always
     depends_on:
       - redis
       - database
@@ -58,6 +64,7 @@ services:
       - .env
     hostname: merchant
   customer:
+    restart: always
     depends_on:
       - redis
       - database
@@ -74,6 +81,7 @@ services:
       - HUB_URL=ws://hub-service:10010
     hostname: customer
   cashier:
+    restart: always
     depends_on:
       - redis
       - database
@@ -86,6 +94,7 @@ services:
       - .env
     hostname: cashier
   advertiser:
+    restart: always
     depends_on:
       - redis
       - database
@@ -100,6 +109,7 @@ services:
       - DYNAMIC_ACTOR_GROUP=Advertiser
     hostname: advertiser
   vendor:
+    restart: always
     depends_on:
       - redis
       - database
