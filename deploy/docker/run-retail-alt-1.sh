@@ -25,23 +25,14 @@ echo "deploy docker dependencies"
 pushd ../../components
 
 if [ $MODE = "build" ] || [ $MODE = "up" ]; then
-  docker-compose -p boaretail -f docker-compose-init.yml build
+  docker-compose -p boaretail -f docker-compose.yml build
   docker tag redis boaretail_redis
   docker tag mongo boaretail_mongo
 fi
 if [ $MODE = "up" ]; then
-  docker-compose -p boaretail -f docker-compose-init.yml up --build -d
+  docker-compose -p boaretail -f docker-compose.yml up --build -d
   echo "wait for dependencies to start ..."
   sleep 30
-fi
-
-if [ $MODE = "build" ] || [ $MODE = "up" ]; then
-  docker-compose -p boaretail -f docker-compose-customer.yml build
-fi
-if [ $MODE = "up" ]; then
-  docker-compose -p boaretail -f docker-compose-customer.yml up --build -d
-  echo "wait for actors to start ..."
-  sleep 60
 fi
 
 popd

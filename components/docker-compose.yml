@@ -1,3 +1,4 @@
+version: "3"
 services:
   redis:
     image: redis
@@ -5,9 +6,9 @@ services:
       - "6379:6379"
     hostname: redis
   database:
-    image: mongo:5.0
+    image: mongo
     ports:
-      - 27017:27017
+      - 27027:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=Architecture
       - MONGO_INITDB_ROOT_PASSWORD=f1rst
@@ -17,14 +18,14 @@ services:
     hostname: db
   advertiser-service:
     ports:
-      - 3001:3001
+      - 10001:3001
     build:
       context: ./external/advertiser-service
   hub-service:
     depends_on:
       - redis
     ports:
-      - 3010:3010
+      - 10010:3010
     build:
       context: ./external/hub-service
     environment:
@@ -39,28 +40,22 @@ services:
         - database
       build:
         context: ./identity-provider
+      env_file:
+        - .env
       environment:
-        - REDIS_HOST=redis
-        - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-        - DB_NAME=architecture_first_001
-        - EXTERNAL_CALLS_ROOT_PATH=logic
-        - TASKLIST_ROOT_PATH=tasklists
-        - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+        - TASKLIST_ROOT_PATH=none
       hostname: identity-provider
   merchant:
     depends_on:
       - redis
       - database
       - identity-provider
+    ports:
+      - 10082:8082
     build:
       context: ./merchant
-    environment:
-      - REDIS_HOST=redis
-      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-      - DB_NAME=architecture_first_001
-      - EXTERNAL_CALLS_ROOT_PATH=logic
-      - TASKLIST_ROOT_PATH=tasklists
-      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    env_file:
+      - .env
     hostname: merchant
   customer:
     depends_on:
@@ -68,60 +63,51 @@ services:
       - database
       - identity-provider
       - hub-service
+    ports:
+      - 5006:5006
+      - 10084:8084
     build:
       context: ./customer
+    env_file:
+      - .env
     environment:
-      - REDIS_HOST=redis
-      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-      - DB_NAME=architecture_first_001
-      - EXTERNAL_CALLS_ROOT_PATH=logic
-      - TASKLIST_ROOT_PATH=tasklists
-      - HUB_URL=ws://hub-service:3010
-      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+      - HUB_URL=ws://hub-service:10010
     hostname: customer
   cashier:
     depends_on:
       - redis
       - database
       - identity-provider
+    ports:
+      - 10083:8083
     build:
       context: ./cashier
-    environment:
-      - REDIS_HOST=redis
-      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-      - DB_NAME=architecture_first_001
-      - EXTERNAL_CALLS_ROOT_PATH=logic
-      - TASKLIST_ROOT_PATH=tasklists
-      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    env_file:
+      - .env
     hostname: cashier
   advertiser:
     depends_on:
       - redis
       - database
       - identity-provider
+    ports:
+      - 10085:8085
     build:
       context: ./advertiser
+    env_file:
+      - .env
     environment:
-      - REDIS_HOST=redis
-      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-      - DB_NAME=architecture_first_001
-      - EXTERNAL_CALLS_ROOT_PATH=logic
-      - TASKLIST_ROOT_PATH=tasklists
       - DYNAMIC_ACTOR_GROUP=Advertiser
-      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
     hostname: advertiser
   vendor:
     depends_on:
       - redis
       - database
       - identity-provider
+    ports:
+      - 10086:8086
     build:
       context: ./vendor
-    environment:
-      - REDIS_HOST=redis
-      - DB_CONNECTION_STRING=mongodb://boa-user:boa-password@db:27017/architecture_first_001
-      - DB_NAME=architecture_first_001
-      - EXTERNAL_CALLS_ROOT_PATH=logic
-      - TASKLIST_ROOT_PATH=tasklists
-      - PASS_KEY=4pOb5z5ALQhlUJQKlKzTZyB01MxFRZ8hKBKarI0jpV8PVMvC0UxJFYHA2jVtqfj
+    env_file:
+      - .env
     hostname: vendor
