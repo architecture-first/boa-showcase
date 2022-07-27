@@ -54,6 +54,20 @@ $ echo $JAVA_HOME
 /c/Users/boa/.jdks/corretto-17.0.3
 ```
 
+### Install Maven
+
+Maven is required to build the application.
+
+```shell
+sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+sudo yum install -y apache-maven
+mvn –version
+```
+
+Above is a technique to install Maven via yum.
+Please use the appropriate tool for your environment.
+
 ### Install Git
 
 Install Git from a trustworthy source, such as https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
