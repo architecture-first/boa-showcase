@@ -38,6 +38,10 @@ An overview of BOA can be found [here](docs/programming/Overview.md).
 
 A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
 
+## Javadoc reference
+
+The developer API reference can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:8080/).
+
 ## Installation
 The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
 
