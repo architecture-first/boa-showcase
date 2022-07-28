@@ -38,6 +38,8 @@ An overview of BOA can be found [here](docs/programming/Overview.md).
 
 A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
 
+**Note**: Follow the "[Using the showcase retail application](README.md#using-the-showcase-retail-application)" instructions below."
+
 ## Javadoc reference
 
 The developer API reference can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:8080/).
