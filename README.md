@@ -25,9 +25,9 @@ The BOA approach takes advantage of the power of the Cloud-Centric environments.
 The main requirements for using the BOA platform are access to Redis for core communication and support for the messaging protocol.
 As shown above, the platform is a non-opinionated layer on top of existing Cloud and On-Prem solutions.
 
-The storing of data and messaging are also not limited to using Redis.
+The user is not limited to storing data and messaging using Redis.
 Redis is used for the base functionality, but the developers of custom Actor code are encouraged to use whatever storage locations that are appropriate.
-For instance a Library, can be stored in an AWS S3 Bucket or a mounted file system depending on the project.
+For instance a Library, can be backed by an AWS S3 Bucket or a mounted file system depending on the project.
 
 ## Overview
 
@@ -126,7 +126,7 @@ The solution consists of the following components
       - The main items requiring Redis are the Bulletin board and the core messaging.
 - **NodeJS**
   - The communication with the client occurs though a NodeJS application.
-    - The microservice manages the UI static content as well as the websockets per client.
+    - The microservice manages the UI static content as well as the client websockets.
   - This component is not required for BOA applications, but shows a nice way to handle websocket communication with particular clients.
     - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
 - **Browser** (from the user's desktop)
@@ -134,7 +134,7 @@ The solution consists of the following components
     - Contains basic HTML5 and JavaScript to demonstrate code to interact with BOA Actors.
       - This logic can be replaced with any library, such as Angular, React, Vue, Svelte, etc.
     - It is intentionally not focused on look and feel
-      - This is just a showcase application.
+      - This is just a showcase application of back-end functionality
 - Actors
   - **Customer**
     - Represents the User and interacts with the User's browser for communication
@@ -159,7 +159,8 @@ The solution consists of the following components
 - Messages
   - **business-retail**
     - The repository of ArchitectureFirst events for communication in the application.
-      - There should be a custom business library per application type.
+      - If you are using a common language, such as Java you can create a custom business library for the application.
+      - Otherwise, there should be a common message format that allows the Actors to consume the messages.
 - Platform
   - **vicinity-platform**
     - The runtime that defines the Vicinity and Actors base functionality
