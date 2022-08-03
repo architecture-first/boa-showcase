@@ -8,7 +8,7 @@ This tutorial will show the steps to create an Actor that speaks to the Merchant
 
 ## Prerequisites
 
-The showcase retail application is running as a Docker Compose application or in a local Kubernetes Cluster as described in [Getting Started](../../README.md).
+The retail showcase application is running as a Docker Compose application or in a local Kubernetes Cluster as described in [Getting Started](../../README.md).
 
 ## Steps
 

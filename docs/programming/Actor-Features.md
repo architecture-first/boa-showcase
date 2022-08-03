@@ -3,13 +3,12 @@
 The Actor is the most important part of the system.
 The Actor performs many duties that the user in the corresponding role does.
 
-The expectations for the Actor should be higher than it is for a service in the traditional application.
-The Actor should handle bad input the same way an actual user would handle a poor paper copy of information, for example.
-In that case, the user still finds a way to process the request.
+For instance, the Actor should handle bad input the same way an actual human worker would handle a poor paper copy of information, for example.
+In that case, the worker still finds a way to process the request.
 The Actor should attempt to do the same if possible.
 Of course, the exception to this rule is something like a banking transaction that must complete fully or be rolled back.
 
-The developer should build the Actor with the level of intelligence that is appropriate based on the business and technical vision.
+The desired Actor has the level of intelligence that is appropriate based on the business and technical vision.
 At the low end, an Actor can simply be a renamed microservice with an asynchronous API.
 At the high end, the Actor may contain machine learning logic and other capabilities.
 
@@ -73,7 +72,7 @@ A developer can add custom behavior to any Actor to perform Machine Learning or 
 
 ### Communication
 
-When Actors communicate it is considered a conversation called a Convo.
+When Actors communicate it is considered a conversation, nicknamed a Convo.
 
 #### Say
 
@@ -253,7 +252,7 @@ To keep with the business metaphor, the database is referred to as a warehouse.
 
 In the showProduct method, the Actor will proactively suggest products to the caller.
 This is a benefit of the conversational approach.
-More can be accomplished in a Convo than can be done in a one way request/response approach, unless the request/response has a heavy payload.
+More can be accomplished in a conversation than can be done in a one way request/response approach, unless the request/response has a heavy payload.
 
 **Note**: If an Actor does not understand an Event, meaning there is no handler registered for the event it replies with an ActorDoesNotUnderstandEvent.
 
@@ -283,19 +282,13 @@ The Actor performs a task one time when it starts.
      */
     protected void on30min() {
         // override for specific behavior
-        if (logic.existsFor30min()) {
-            applyLogic("30min");
-        }
     }
 
     /**
      * Perform processing every hour
      */
     protected void on60min() {
-        recordNotes();
-        if (logic.existsFor60min()) {
-            applyLogic("60min");
-        }
+        // override for specific behavior
     }
 
     /**
@@ -303,9 +296,6 @@ The Actor performs a task one time when it starts.
      */
     protected void on12hours() {
         // override for specific behavior
-        if (logic.existsFor12hours()) {
-            applyLogic("12hours");
-        }
     }
 
     /**
@@ -313,14 +303,12 @@ The Actor performs a task one time when it starts.
      */
     protected void on24hours() {
         // override for specific behavior
-        if (logic.existsFor24hours()) {
-            applyLogic("24hours");
-        }
     }
 ```
 
 The Actor performs actions for every interval above.
 For instance, on30min is called every 30 minutes.
+These overridable methods are good places for logic that must be performed proactively and periodically.
 
 #### Check Health
 
@@ -496,7 +484,7 @@ This method allows for custom behavior if an event is not handled or understood 
     }
 ```
 
-This method is called when there is an error during processing in a Convo.
+This method is called when there is an error during processing in a conversation.
 The snippet above is from the Customer that will intelligently interrogate the message and inform the client user.
 
 

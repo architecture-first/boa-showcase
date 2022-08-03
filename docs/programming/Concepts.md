@@ -8,8 +8,7 @@ In this case, the requirements are defined and the Actors and Use Cases are iden
 
 The Use Cases should be business-focused instead of application-focused.
 This approach will lead to reusable Actors that span applications.
-The effort can help to split up a monolithic application into microservices successfully.
-Because, if a microservice is only used by one application it is a lot of effort for minimal gain.
+The effort can help to split up a monolithic application into microservices successfully because, if a microservice is only used by one application it is a lot of effort for minimal gain.
 
 Since users generally span multiple applications to get their work done, an Actor modeled after the same role will naturally span applications.
 
@@ -22,10 +21,9 @@ In the diagram above, the same Merchant is serving both the Storefont for shoppe
 ![](images/Concepts/boa-general-documentation-Concepts-Business-Metaphor.drawio.png)
 
 The goal is to hide details inside simple concept objects that mirror the real world.
-For instance, in the showcase application, the Storefront, Bulletin board, etc. are defined in Redis.
-The Actor developer is hidden from the technical details so the logic remains simple and business-focused.
+For instance, in the retail showcase application, the Storefront, Bulletin board, etc. are defined in Redis while the Warehouse and User Registry is defined in MongoDB.
+The developer of the Actor is hidden from the technical details so the logic remains simple and business-focused.
 
-This approach works with the database as well.
 
 ```java
     @TaskTracking(task = "merchant/ShowProducts", defaultParentTask = "customer/ViewProducts")
@@ -55,7 +53,7 @@ This approach works with the database as well.
     }
 ```
 
-On the snippet above, the code clearly reflects the use case.
+On the snippet above, the code clearly reflects the Use Case.
 From a technical perspective, it actually performs caching by storing recent products in Redis, but the code looks like natural business logic.
 The business logic is not lost in lots of technical details.
 
@@ -69,10 +67,10 @@ Below, is the corresponding Use Case.
 |Actors| Merchant, Customer|
 |Preconditions| |
 |Triggers| The customer has attempted to view products via (C01 - View-Products).|
-|Main Flow| 1. The merchant finds products from inventory based on criteria.<br/> 2. The merchant displays the corresponding products.|
-|Alternate Flows| At step 1, the merchant cannot find available products.<br/>2.1 The merchant notifies the customer.<br/>2.2 The use case ends.|
-|Exceptions| At step 2, due to technical difficulties, the merchant cannot display the products.<br/>2.1 The merchant notifies the customer.<br/>2.2 The user case ends.|
-|Postconditions| The merchant has displayed the desired products.|
+|Main Flow| 1. The Merchant finds products from inventory based on criteria.<br/> 2. The Merchant displays the corresponding products.|
+|Alternate Flows| At step 1, the Merchant cannot find available products.<br/>2.1 The Merchant notifies the Customer.<br/>2.2 The Use Case ends.|
+|Exceptions| At step 2, due to technical difficulties, the Merchant cannot display the products.<br/>2.1 The Merchant notifies the Customer.<br/>2.2 The user case ends.|
+|Postconditions| The Merchant has displayed the desired products.|
 
 Note: For the exception, the communication of 'technical difficulties' is provided by the framework.
 
@@ -81,36 +79,36 @@ Note: For the exception, the communication of 'technical difficulties' is provid
 ![](images/Concepts/boa-general-documentation-Concepts-Roles.drawio.png)
 
 The roles are implemented by separate Actors.
-With this approach, an Actor such as the Retail Manager can access a database that is inaccessible to the customer.
+With this approach, an Actor such as the Retail Manager can access a database that is inaccessible to the Customer.
 The Retail Manager can still interact with the Merchant just like the Customer can.
-The Retail Manager may send different messages though.
+Though the Retail Manager can interact with the Merchant it may send different messages.
 
 ## Proactive
 
 ![](images/Concepts/boa-general-documentation-Concepts-Proactive.drawio.png)
 
-The Actors should be proactive.
+The Actors are designed to be proactive.
 In the diagram above, the request/response interaction would start at step 1 and end at step 2.
 In the proactive approach, the Actor should perform additional value-add behavior if possible.
-In this case, the Merchant is suggesting products to the Customer as the Customer looks at a particular product.
+In this case, in steps 3, 4 and 5 the Merchant is suggesting products to the Customer as the Customer looks at a particular product.
 This is likely to happen in real life with human interactions.
-We want to model for the same behavior.
+We want to develop the Actor with similar behavior.
 
 Periodically, the Merchant checks the inventory status to see if any changes are needed.
-This can help prevent the "running out of product X" problem that can occur if similar logic doesn't exist at all.
+If some inventory is low the Merchant will order some replacement items.
 
 ## Error Handling
 
 ![](images/Vision/boa-general-documentation-Vision-Error-Handling.drawio.png)
 
-Error handling in a distributed environment is more difficult than in a monolith.
-Errors have to be handled in the microservice and also propagated back the interested party, such as a user or technical support.
+Error handling in a distributed environment is more difficult than it is in a monolith.
+Errors have to be handled in the microservice and also propagated back the interested party, such as a user or Technical Support.
 
 In BOA, an exception is caught by the platform and naturally sent to the Vicinity Monitor as well as the original caller.
-The Vicinity Monitor ('channel: VicinityMonitor') is a Redis channel that can be monitored by subscribing.
+The Vicinity Monitor ('channel: VicinityMonitor') is a channel that can be monitored by subscribing.
 
 The exception is also naturally logged.
-As in a Convo, the attribute that binds the exception to the request is the request ID.
+As in a conversation, the attribute that binds the exception to the request is the request ID.
 
 ```java
         Object proceed = null;
@@ -196,16 +194,16 @@ Based on the analysis, the Customer will notify the client user with a friendly 
 ## Built-in Gains
 
 Using the real world metaphors can lead to more robust and performant coding without losing the business logic within lots of technical details.
-For instance, the showcase application performs caching by using a metaphor that is easy to understand.
+For instance, the retail showcase application performs caching by using a metaphor that is easy to understand.
 
 ![](images/Concepts/boa-general-documentation-Concepts-Builtin-Caching.drawio.png)
 
 The developer can naturally code high performance code during initial development instead of waiting until there is a problem.
-For instance, the Merchant is coded to store highly accessed information in the Storefront (e.g. Redis cache).
+For instance, the Merchant is coded to store highly accessed information in the Storefront (e.g. cache).
 It can safely do this if the Merchants are the main accessors to the database for products.
 The Merchants will be aware of any inventory changes.
 
-If a Merchant cannot find a particular product in the Storefront, the Merchant can retrieve the product from the Warehouse (a.k.a. MongoDB database).
+If a Merchant cannot find a particular product in the Storefront, the Merchant can retrieve the product from the Warehouse (e.g. database).
 This is natural behavior and is something that an actual worker in the real world would do.
 This makes the logic and architecture understandable for both the developer and the user.
 
@@ -233,11 +231,9 @@ This produces natural caching that is understandable by developers and non-devel
 
 As shown in previous sections, the Actors should closely resemble an actual user role.
 The Actor's logic should map to Use Cases.
-This will help define not only the happy path, but the exception path and result in logic to handle it.
+This will help define not only the happy path, but the exception path and result in logic to handle the scenarios.
 
 ## Extensibility and Grid Computing Support
-
-![](images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
 Actors can run in a Kubernetes cluster, a Docker Swarm, a Docker Compose environment, and a native environment that has access to the Redis Vicinity.
 In essence, the runtime model supports grid computing from any available platform.
@@ -246,13 +242,11 @@ In essence, the runtime model supports grid computing from any available platfor
 
 The Vicinity is an environment that transcends the particular runtime environments.
 This is similar to accessing a database from various locations, except it is based on processing instead of data.
-Unlike the HTTP protocol communication, there is minimal setup to support this extensibility.
-Regardless, the usual networking security rules should apply.
 
 ## Robustness
 
 An Actor should be resilient like a human is when something goes unexpectedly.
-For instance, if you show up to a store to return a product and are missing a receipt the manager can still look up your sale with your credit card and grant a refund.
+For instance, if you show up to a store to return a product and are missing a receipt the manager can still find your sale by using your credit card and grant a refund.
 Both you and the manager end the situation on a happy note.
 
 It is too often that an application fails in production producing a SEV 1 situation when the problem is minor, such as finding that a field is missing on a POJO for the results of a query.
@@ -270,7 +264,7 @@ I don't know anybody who likes that.
 Why do applications work that way?
 Who enjoys filling out wizards online only to find out some piece of information is missing so the entire session must be discarded?
 
-The backward-compatibility and degraded experience approach allows for easier releases in a microservice environment.
+The backward-compatibility and degraded-experience approach allows for easier releases in a microservice environment.
 We still want to fail fast if we have to fail, but let's reduce the times there is a complete failure.
 We also want to provide as much information as usable in the error log to quickly find the problem.
 This does not mean randomly log everything, but instead carefully plan the logging strategy so that a technical support person can resolve the issue without calling you for help.
@@ -288,7 +282,7 @@ A discussion of some issues and strategies to increase robustness are below.
       - That is a SEV 1
   - In a NoSql database, like MongoDB or JSON supported in Oracle, Sql Server, etc.
     - The data is already joined together so no surrogate key is needed most of the time
-      - If there is no surrogate key then it cannot get lost, and we cannot have orphan data
+      - If there is no surrogate key then it cannot get lost, and we cannot have orphaned data
         - This eliminates a whole class of show-stopper and hard to fix problems.
         - Granted, we must trust the application to properly store and validate data
 - In Kubernetes we have control of the pod and can handle databases in a different way
@@ -297,7 +291,7 @@ A discussion of some issues and strategies to increase robustness are below.
       - This reduces the chance for application vs. database sync problems
       - It also reduces connectivity issues
         - Note: I am not recommending this approach unilaterally, but I am just pointing out that we can and should do things to reduce production issues.
-          - Your business and technical support teams thank you :)
+          - Your Business and Technical Support teams thank you :)
 
 For one last example, is there a way to store data temporarily if the database goes down?
 The database is smart enough to store requests in a transaction log or MongoDB oplog so that it can restore itself if it goes down.

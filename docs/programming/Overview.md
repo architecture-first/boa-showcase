@@ -11,26 +11,6 @@ The latest of the major industry changes is the move to the Cloud.
 The Cloud has removed many of the barriers of the 'on prem' environments and opened up new opportunities.
 Some of those opportunities include distributed computing, machine learning, high availability and the ability to create smarter programs.
 
-## Classic Programming
-With all the computing power, our thinking in the past has been limited.
-Often, the automation has been limited to creating word processors, forms and grids.
-
-![](images/boa-general-documentation-Form.drawio.png)
-
-As shown above, the main vehicle for the entry of information is a form.
-The data is retrieved and saved using standard CRUD processing.
-
-![](images/boa-general-documentation-Grid.drawio.png)
-
-The standard way to represent a set of information is a grid.
-This is partly because many applications are created from an Excel application that no longer meets the user demands.
-
-![](images/boa-general-documentation-Magazine.drawio.png)
-
-Websites are great, but they are mainly glorified magazines.
-They have main pages, navigation bars, etc.
-They are built to provide data and the ability for the user to navigate, but are rarely proactive.
-
 ## New Opportunities
 
 The new opportunities allow an application to interact with a user instead of just obeying commands.
@@ -48,7 +28,7 @@ We want to do more than produce a grid that a user uses to export data to Excel 
 We want to do the processing that the user exported the data for if possible.
 The goal is to make the user's job easier and not to simply move data around.
 
-The showcase retail application demonstrates some techniques for coding to the desired value-add goals.
+The retail showcase application demonstrates some techniques for coding to the desired value-add goals.
 The application uses the Business Oriented Architecture (BOA) approach of the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy.
 
 These goals include:
@@ -144,7 +124,7 @@ In other words, an Actor can learn.
 The actor interacts with human understandable objects that hide the underlying technology.
 The utility items represent similar concepts that the actual user may use if operating outside the computer.
 
-In the diagram above, there is a Bulletin board, Task list and To do list.
+In the diagram above, there is a Bulletin board, Task list and To-Do list.
 Though these items are backed by Redis and require the Redis API to use them the components offer a developer friendly interface.
 
 ## Vision
@@ -267,7 +247,7 @@ Separating out microservices doesn't help if they are actually coupled into a di
 It is important to analyze whether a feature should be solved by two separate microservices or one combined microservice.
 The answer is case by case and based on analysis.
 
-With the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) approach, the BOA Actor division is a nice reason to split an application.
+With the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy, the BOA Actor division is a nice reason to split an application.
 Alternatively, the non-BOA technique to split a microservice is based on process breakdowns.
 
 ![](images/Vision/boa-general-documentation-Vision-Loose-Coupling.drawio.png)

@@ -11,7 +11,7 @@ In keeping with the human metaphor, the version is called a generation.
 
 In the diagram above, both generations of the Merchant exist in the Vicinity.
 By default, the messages will alternate in a round-robin fashion.
-This scenario can support a form of Canary deployment or A/B testing where a percentage of messages are sent to the new generation and the rest to the other generation for a slow rollout.
+This scenario can support a form of Canary deployment or A/B testing where a percentage of messages are sent to the new generation of Actors and the rest to the other generation for a slow rollout.
 
 ### Blue/Green deployment
 Blue/Green deployment is supported by using the _boa-project_ attribute
@@ -130,7 +130,7 @@ This actor can execute commands against a Kubernetes sidecar and other non-BOA s
 ![](images/Special-Features/boa-general-documentation-Special-Dyamic-Actor.drawio.png)
 
 The diagram above shows a Kubernetes layout.
-As desired, each pod has one main Actor (minus the Security Guard).
+As desired, each pod has one main Actor (with an accompanying Security Guard).
 The Actor is part of the BOA platform and requires a developer to install the vicinity-platform and write Java code to use it. 
 
 There are some situations where there is existing code and the goal is merely to interact with the BOA platform.
