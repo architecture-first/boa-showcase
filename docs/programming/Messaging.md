@@ -9,7 +9,7 @@ In a containerized application, such as Docker or Kubernetes, personal space is 
 
 If the event is not a local type, such as produced by a whisper, it is wrapped by the Vicinity into a VicinityMessage.
 The Vicinity routs this message to the desired targets.
-Each target has a subscription into a Redis channel based on the Actor's name and the Actor's group.
+Each target has a subscription into a channel based on the Actor's name and the Actor's group.
 Therefore, the message is routed directly to the Actor.
 
 There is a Security Guard in each personal space that checks both ingoing and outgoing messages.
@@ -20,25 +20,26 @@ On the receiving end, if a Security Guard detects an invalid message it will rej
 ## ArchitectureFirstEvent
 
 The ArchitectureFirstEvent contains important routing information as well as the desired payload.
-It is divided up between a header and a payload.
-It is ok to have properties outside the header and the payload as long as there is a translator on the sending and receiving ends.
+It consists of a header and a payload.
+
+Note: It is ok to have properties outside the header and the payload as long as there is a translator on the sending and receiving ends.
 
 ### Header
 
-| Property    | Description                                                                                                                                         |
-|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| from        | The Actor's name()                                                                                                                                  |
-| to          | A list of group() names or individual actor names                                                                                                   |
-| requestId   | A generated ID to represent the conversation or Convo                                                                                               |
+| Property    | Description                                                                                                                         |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| from        | The Actor's name()                                                                                                                  |
+| to          | A list of group() names or individual actor names                                                                                   |
+| requestId   | A generated ID to represent the conversation                                                                                               |
 | jwtToken    | An expirable token containing information for accessing the system. It is up to the system designers to determine what needs an access token or not |
-| boa-conn    | A connection string for communication with the client, such as websockets                                                                           |
-| boa-project | A project name for an actor to receive specific messages.  Default is 'default'.                                                                    |
-| originalEventName    | The name of the starting event in a Convo                                                                                                           |
+| boa-conn    | A connection string for communication with the client, such as websockets                                                           |
+| boa-project | A project name for an actor to receive specific messages.  Default is 'default'.                                                    |
+| originalEventName    | The name of the starting event in a conversation                                                                                           |
 
 
 ### Payload
 
-The payload is a dynamic field that is based on a SimpleModel, which encapsulates a Map.
+The payload is a dynamic field that is based on an internal SimpleModel class, which encapsulates a Map.
 The field can contain anything, but it is the responsibility of the receiver to translate the fields to a POJO or equivalent.
 If the default behavior is adequate then no intervention is necessary, otherwise the event should cast the fields to the correct type or override onVicinityInit to format the desired fields.
 
@@ -69,11 +70,11 @@ As the first step, the Customer creates and says a message (ViewProductEvent).
 Due to the framework, most of the header information shown is automatically supplied in the creation of the ViewProductEvent.
 
 The important item, called requestId, is highlighted in yellow.
-This key field links the Convo and Task list together.
+This key field links the Convo (a.k.a. conversation) and Task list together.
 
 When the Merchant hears the message it creates a ViewProductReplyEvent.
-The Merchant then calls the setOriginalEvent method to copy values and ensure that the Convo continues.
-If this step is not done a new requestId will be created and it will be considered a new Convo.
+The Merchant then calls the setOriginalEvent method to copy values and ensure that the conversation continues.
+If setOriginalEvent is not called a new requestId will be created, and it will be considered a new conversation.
 
 #### Monitoring
 
@@ -91,9 +92,9 @@ The requestId is tracked in 4 objects
 2. Ack - The list of acknowledged messages by order
 ![](images/Messaging/View-Product-Ack.png)
    1. In this case, only one message is acknowledged since the same message is used during sending and replying.
-3. Convo - The list of messages sent back and forth and the status
+3. Convo - The list of messages sent back and forth and the status in a conversation
 ![](images/Messaging/View-Product-Convo.png)
-   1. This conversation is updated live and an event can have the following status
+   1. This Convo is updated live and an event can have the following status
 
 ```java
         Starting ("Starting"),
@@ -106,11 +107,11 @@ The requestId is tracked in 4 objects
 ```
    The Convo statuses help for troubleshooting in the asynchronous environment.
 
-4. Tasklist - The list of tasks as part of a use case that are performed by the participating actors.
+4. Task list - The list of tasks as part of a Use Case that are performed by the participating actors.
 
 ![](images/Messaging/View-Product-Tasklist.png)
-   1. The Tasklist shows the steps of the use case as they are being worked on.
-   2. There are extra items in the Task list above, such as SuggestProducts because the Actor proactively contacted the Customer during the ViewProduct use case.
+   1. The Tasklist shows the steps of the Use Case as they are being worked on.
+   2. There are extra items in the Task list above, such as SuggestProducts because the Actor proactively contacted the Customer during the ViewProduct Use Case.
 
 ```java
     @TaskTracking(task = "merchant/ShowProduct", defaultParentTask = "customer/ViewProduct")

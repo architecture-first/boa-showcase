@@ -30,5 +30,5 @@ db.orders.aggregate([
 // A01 - Review Customer Analytics (end)
 
 // A02 - Present Advertisement (start)
-// Return product from Review Customer Analytics use case
+// Return product from Review Customer Analytics Use Case
 // A02 - Present Advertisement (end)

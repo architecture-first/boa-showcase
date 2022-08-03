@@ -18,21 +18,21 @@ The blocking behavior is discussed in the Actor and Messaging documentation.
 
 ![](images/boa-general-documentation-Acknowledgement.drawio.png)
 
-Unless specified otherwise, the target Actor will acknowledge any message that it received back to the sender.
+Unless specified otherwise, the Actor that hears the message will acknowledge any message that it received back to the sender.
 
 ## Conversation
 
 ![](images/boa-general-documentation-Conversation.drawio.png)
 
-One or more Actors can participate in a Conversation called a Convo.
-Each Convo is linked together by a common request ID.
+One or more Actors can participate in a conversation.
+Each conversation is linked together by a common request ID.
 
 ## Task list
 
 ![](images/boa-general-documentation-Tasklist.drawio.png)
 
-A Task list is used for tracking a use case between Actors.
-Each Actor updates the status when they are finished with their tasks.
+A Task list is used for tracking a Use Case between Actors.
+Each Actor updates its status when they are finished with their tasks.
 
 ## To-Do list
 
@@ -49,8 +49,10 @@ This strategy can help prevent message loss.
 The bulletin board is used to find Actors to communicate with to accomplish tasks.
 The available Actors continually update their statuses on the Bulletin board.
 If an Actor no longer updates its status to running it will be removed from the Active board and will no longer receive messages.
+The bulletin board for availability is automatically updated by the base Actor code. 
 
 As shown in the diagram, Actors of different versions can work together.
+This interoperability allows for resilient applications and graceful deployments.
 
 ## Links
 - [Overview](Overview.md 'Overview')

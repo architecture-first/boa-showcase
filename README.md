@@ -9,7 +9,7 @@ It is not an all or nothing strategy.
 You can use it for part or all of your applications.
 It is build to interoperate with current code instead of trying to replace all existing code.
 
-It is recommended, but not required, to use the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) approach to develop these items as well as items outside this project.
+It is recommended, but not required, to use the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy to develop these items as well as items outside this project.
 The project is part of a Business Oriented Architecture and called BOA.
 
 ![](docs/programming/images/boa-general-documentation-BOA-Icon.drawio.png)
@@ -38,7 +38,7 @@ An overview of BOA can be found [here](docs/programming/Overview.md).
 
 A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
 
-**Note**: Follow the <a href="#using-the-showcase-retail-application">Using the showcase retail application</a> instructions below."
+**Note**: Follow the <a href="#using-the-retail-showcase-application">Using the retail showcase application</a> instructions below."
 
 ## Javadoc reference
 
@@ -105,15 +105,10 @@ To get to the settings page, click the upper right corner of the windows
 
 If you are planning to run in Kubernetes enable Kubernetes in the settings.
 
-### Optional: Install Minikube (or equivalent)
 
-Note: Use this option if you decide not to install Docker Desktop.
+## Run the retail showcase application
 
-https://minikube.sigs.k8s.io/docs/start/
-
-## Run the showcase retail application
-
-The showcase retail application contains running code based on the platform.
+The retail showcase application contains running code based on the platform.
 It should only be used for reference.
 The solution consists of the following components
 
@@ -125,7 +120,7 @@ The solution consists of the following components
     - Many objects are stored in Redis, but most can be stored in any storage repository
       - The main items requiring Redis are the Bulletin board and the core messaging.
 - **NodeJS**
-  - The communication with the client occurs though a NodeJS application.
+  - The communication with the client occurs though a NodeJS service.
     - The microservice manages the UI static content as well as the client websockets.
   - This component is not required for BOA applications, but shows a nice way to handle websocket communication with particular clients.
     - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
@@ -134,7 +129,7 @@ The solution consists of the following components
     - Contains basic HTML5 and JavaScript to demonstrate code to interact with BOA Actors.
       - This logic can be replaced with any library, such as Angular, React, Vue, Svelte, etc.
     - It is intentionally not focused on look and feel
-      - This is just a showcase application of back-end functionality
+      - This is a reference application of back-end functionality
 - Actors
   - **Customer**
     - Represents the User and interacts with the User's browser for communication
@@ -145,7 +140,7 @@ The solution consists of the following components
     - Responsible for the product and inventory portion of the application.
   - **Cashier**
     - Responsible for accepting payment and processing orders.
-    - All payment and processing is faked for this showcase application
+    - All payment and processing is faked
   - **Identity Provider**
     - Responsible for providing a valid Access Token (JwtToken).
   - **Security Guard**
@@ -158,7 +153,7 @@ The solution consists of the following components
       - It executes based on a developer defined script and interacts with a sidecar component for custom processing
 - Messages
   - **business-retail**
-    - The repository of ArchitectureFirst events for communication in the application.
+    - The repository of ArchitectureFirst events for communication
       - If you are using a common language, such as Java you can create a custom business library for the application.
       - Otherwise, there should be a common message format that allows the Actors to consume the messages.
 - Platform
@@ -167,7 +162,7 @@ The solution consists of the following components
     - This library will be kept in a Maven Repository in the near future.
 
 
-You can take this application and modify it for your particular application.
+You can start with the retail showcase application and modify it for your particular application.
 Alternatively, you may choose to build your system from scratch by just using the vicinity-platform library.
 
 ### Docker Compose
@@ -203,7 +198,7 @@ sudo ./run-retail-alt-1.sh up
 
 Go to the browser and location http://localhost:10010.
 
-Follow "Using the showcase retail application" instructions later in this document.
+Follow "Using the retail showcase application" instructions later in this document.
 
 ### Kubernetes
 
@@ -240,7 +235,7 @@ Wait 2 minutes then go to the browser and location http://localhost:30020.
 
 **Alternative**: if deploying to a server, you can create a custom script to compile java, build images and deploy via Kustomize.
 
-## Using the showcase retail application
+## Using the retail showcase application
 
 Note: If you are rebuilding the application after the initial deployment clear tokens as shown below.
 

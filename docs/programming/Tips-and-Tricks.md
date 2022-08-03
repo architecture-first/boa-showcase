@@ -4,11 +4,11 @@ This document contains a list of tips and tricks to effectively use the platform
 
 ## Use the Architecture-First strategy to identify Actors.
 
-[Architecture-First Approach](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url).
+[Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url).
 
-## Use the platform as a starting point.
+## Using the platform as a starting point.
 
-It is recommended to modify the showcase retail platform to match your desired architecture.
+An option to get started is to modify the retail showcase platform to match your desired architecture.
 Once, the Actors have been defined they can be slowly introduced into the showcase application and the irrelevant Actors replaced.
 
 ## Install Redis Commander
@@ -112,7 +112,7 @@ boa-retail-redis-service:6389> hgetall "BulletinBoard:topic/VicinityStatus/Merch
 
 The Bulletin board shows that the Actor with the expected ID is running and has a recent timestamp.
 
-## If Redis is not available the Actors react
+## If Redis is not available the Actors will react
 
 By default, if Redis is not available, the Actors will notice by their periodic health check.
 
