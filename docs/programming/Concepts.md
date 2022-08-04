@@ -109,6 +109,7 @@ The Vicinity Monitor ('channel: VicinityMonitor') is a channel that can be monit
 
 The exception is also naturally logged.
 As in a conversation, the attribute that binds the exception to the request is the request ID.
+The following two snippets are from BOA platform code.
 
 ```java
         Object proceed = null;
@@ -233,10 +234,10 @@ As shown in previous sections, the Actors should closely resemble an actual user
 The Actor's logic should map to Use Cases.
 This will help define not only the happy path, but the exception path and result in logic to handle the scenarios.
 
-## Extensibility and Grid Computing Support
+## Extensibility
 
-Actors can run in a Kubernetes cluster, a Docker Swarm, a Docker Compose environment, and a native environment that has access to the Redis Vicinity.
-In essence, the runtime model supports grid computing from any available platform.
+Actors can run in a Kubernetes cluster, a Docker Swarm, a Docker Compose environment, and a native environment that has access to the Vicinity.
+In essence, the runtime model supports processing from any available platform.
 
 ![](images/Vision/boa-general-documentation-Vision-Grid-Computing.drawio.png)
 
