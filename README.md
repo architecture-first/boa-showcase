@@ -23,18 +23,14 @@ The BOA approach takes advantage of the power of the Cloud-Centric environments.
 ![](docs/programming/images/Vision/boa-general-documentation-Vision-Support.drawio.png)
 
 The main requirements for using the BOA platform are access to Redis for core communication and support for the messaging protocol.
-As shown above, the platform is a non-opinionated layer on top of existing Cloud and On-Prem solutions.
-
-The user is not limited to storing data and messaging using Redis.
-Redis is used for the base functionality, but the developers of custom Actor code are encouraged to use whatever storage locations that are appropriate.
-For instance a Library, can be backed by an AWS S3 Bucket or a mounted file system depending on the project.
+As shown above, the platform is a layer on top of existing Cloud and On-Prem solutions.
 
 ## Overview
 
 It is recommended to read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
-## Demo version
+## Retail Showcase application
 
 A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
 
@@ -86,7 +82,7 @@ The successful download should include Git Bash.
 
 ![](docs/programming/images/Getting-Started/Getting-Started-Git-Bash.png)
 
-### Clone the BOA showcase project
+### Clone the boa-showcase project
 
 git clone https://github.com/architecture-first/boa-showcase.git
 
@@ -106,7 +102,7 @@ To get to the settings page, click the upper right corner of the windows
 If you are planning to run in Kubernetes enable Kubernetes in the settings.
 
 
-## Run the retail showcase application
+## Run the Retail Showcase Application
 
 The retail showcase application contains running code based on the platform.
 It should only be used for reference.
@@ -117,19 +113,14 @@ The solution consists of the following components
     - Note: The BOA approach will work just as well with a relational database
 - **Redis**
   - Redis is a comprehensive memory database for high performance access.
-    - Many objects are stored in Redis, but most can be stored in any storage repository
-      - The main items requiring Redis are the Bulletin board and the core messaging.
 - **NodeJS**
-  - The communication with the client occurs though a NodeJS service.
-    - The microservice manages the UI static content as well as the client websockets.
   - This component is not required for BOA applications, but shows a nice way to handle websocket communication with particular clients.
-    - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
+  - BOA solutions encourage asynchronous push communication rather than blocking synchronous communication.
 - **Browser** (from the user's desktop)
   - index.html
     - Contains basic HTML5 and JavaScript to demonstrate code to interact with BOA Actors.
-      - This logic can be replaced with any library, such as Angular, React, Vue, Svelte, etc.
-    - It is intentionally not focused on look and feel
-      - This is a reference application of back-end functionality
+      - The BOA platform can work with any library, such as Angular, React, Vue, Svelte, etc.
+    - This is a reference application is intentionally not focused on look and feel.
 - Actors
   - **Customer**
     - Represents the User and interacts with the User's browser for communication
@@ -146,7 +137,7 @@ The solution consists of the following components
   - **Security Guard**
     - Responsible for validating messages and reporting security incidents
   - **Vendor**
-    - Delivers supplies for updating inventory
+    - Deliver supplies for updating inventory
   - **Advertiser**
     - Produces advertisements based on data analysis
     - This Actor represents dynamic behavior without custom Java coding
@@ -163,7 +154,6 @@ The solution consists of the following components
 
 
 You can start with the retail showcase application and modify it for your particular application.
-Alternatively, you may choose to build your system from scratch by just using the vicinity-platform library.
 
 ### Docker Compose
 
