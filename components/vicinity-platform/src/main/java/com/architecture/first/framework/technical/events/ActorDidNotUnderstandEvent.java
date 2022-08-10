@@ -7,7 +7,7 @@ public class ActorDidNotUnderstandEvent extends ArchitectureFirstEvent {
     private ArchitectureFirstEvent unansweredEvent;
 
     public ActorDidNotUnderstandEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ActorDidNotUnderstandEvent", from, to);
     }
 
     /**

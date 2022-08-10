@@ -8,7 +8,7 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class ActorResumeEvent extends ArchitectureFirstEvent {
 
     public ActorResumeEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ActorResumeEvent", from, to);
     }
 
     /**

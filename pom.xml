@@ -24,6 +24,7 @@
     </dependencyManagement>
 
     <modules>
+        <module>components/vicinity</module>
         <module>components/identity-provider</module>
         <module>components/merchant</module>
         <module>components/cashier</module>

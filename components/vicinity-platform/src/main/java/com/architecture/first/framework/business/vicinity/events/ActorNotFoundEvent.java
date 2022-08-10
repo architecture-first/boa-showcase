@@ -8,11 +8,11 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class ActorNotFoundEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public ActorNotFoundEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ActorNotFoundEvent", from, to);
     }
 
     public ActorNotFoundEvent(Object source, String from, String to, ArchitectureFirstEvent event) {
-        super(source, from, to, event);
+        super(source, "ActorNotFoundEvent", from, to, event);
     }
 
     /**

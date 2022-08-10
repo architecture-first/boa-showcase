@@ -8,7 +8,7 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class UnhandledExceptionEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public UnhandledExceptionEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "UnhandledExceptionEvent", from, to);
     }
 
     public void setException(Throwable t) {

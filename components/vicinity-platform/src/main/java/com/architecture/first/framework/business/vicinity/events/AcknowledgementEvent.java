@@ -10,7 +10,7 @@ public class AcknowledgementEvent extends ArchitectureFirstEvent {
     private ArchitectureFirstEvent acknowledgedEvent;
 
     public AcknowledgementEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "AcknowledgementEvent", from, to);
     }
 
     /**

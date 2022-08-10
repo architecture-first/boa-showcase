@@ -11,15 +11,15 @@ import java.util.List;
  */
 public class SecurityIncidentEvent extends ArchitectureFirstEvent implements ErrorEvent {
     public SecurityIncidentEvent(Object source, String from, List<String> to) {
-        super(source, from, to);
+        super(source, "SecurityIncidentEvent", from, to);
     }
 
     public SecurityIncidentEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "SecurityIncidentEvent", from, to);
     }
 
     public SecurityIncidentEvent(Object source, String from, String to, ArchitectureFirstEvent originalEvent) {
-        super(source, from, to, originalEvent);
+        super(source, "SecurityIncidentEvent", from, to, originalEvent);
     }
 
     public SecurityIncidentEvent setCustomerToken(UserToken token) {

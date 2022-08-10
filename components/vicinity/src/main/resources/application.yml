@@ -1,0 +1,8 @@
+server:
+  port: 9991
+vicinity:
+  bulletin-board:
+    items:
+      default-expiration-seconds: 3600 #1 hour,172800 # 2 days
+  url: ${VICINITY_URL}
+  processType: server

@@ -8,7 +8,7 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class ConversationBrokenEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public ConversationBrokenEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ConversationBrokenEvent", from, to);
     }
 
     public ConversationBrokenEvent setParticipant(String participant) {

@@ -1,7 +1,13 @@
 package com.architecture.first.merchant.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.actors.Actor;
+import com.architecture.first.framework.business.actors.exceptions.ActorException;
 import com.architecture.first.framework.business.retail.events.*;
+import com.architecture.first.framework.business.retail.model.cashier.model.inventory.Product;
+import com.architecture.first.framework.business.retail.model.cashier.model.inventory.results.BonusPointAnalysisResult;
+import com.architecture.first.framework.business.retail.model.cashier.model.inventory.results.InventoryReorderAnalysisResult;
+import com.architecture.first.framework.business.retail.model.criteria.ShowProductsCriteria;
 import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
 import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
@@ -12,21 +18,17 @@ import com.architecture.first.framework.business.vicinity.locking.Lock;
 import com.architecture.first.framework.business.vicinity.tasklist.TaskTracking;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
-import com.architecture.first.framework.business.actors.exceptions.ActorException;
-
 import com.architecture.first.framework.technical.events.DefaultLocalEvent;
 import com.architecture.first.framework.technical.util.SimpleModel;
 import com.architecture.first.merchant.MerchantApplication;
-import com.architecture.first.framework.business.retail.model.cashier.model.inventory.results.BonusPointAnalysisResult;
 import com.architecture.first.merchant.repository.InventoryRepository;
-import com.architecture.first.framework.business.retail.model.cashier.model.inventory.results.InventoryReorderAnalysisResult;
-import com.architecture.first.framework.business.retail.model.cashier.model.inventory.Product;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,9 +37,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
+
 @Slf4j
-public class Merchant extends Actor {
+@EnableAspectJAutoProxy(exposeProxy = true)
+public class Merchant extends BusinessActor {
 
     public static final int LIMIT_OF_PRODUCTS_FOR_CRITERIA = 100;
     private final InventoryRepository warehouse;
@@ -87,18 +90,19 @@ public class Merchant extends Actor {
     }
 
     // M01-Show-Products
-    public List<? extends IProduct> showProducts(ArchitectureFirstEvent localEvent) {
-        return showProducts(new ViewProductsEvent(this, "Merchant", "self")
+    public List<? extends IProduct> showProductsFromEvent(ArchitectureFirstEvent localEvent) {
+        return showProducts(new ArchitectureFirstEvent(this, "ViewProductsEvent", "Merchant", "self")
                 .initFromDefaultEvent(localEvent));
     }
 
     @TaskTracking(task = "merchant/ShowProducts", defaultParentTask = "customer/ViewProducts")
-    public List<? extends IProduct> showProducts(ViewProductsEvent event) {
+    public List<? extends IProduct> showProducts(ArchitectureFirstEvent event) {
+        var criteria = (ShowProductsCriteria) event.payload().get("criteria");
         // Try to get products from storefront.  If they are not there then get from warehouse
-        var optionalProducts = storefront.getProducts(event.getCriteria(), Product.class);
+        var optionalProducts = storefront.getProducts(criteria, Product.class);
         var products =  (optionalProducts.isPresent())
                 ? optionalProducts.get()
-                : warehouse.getProducts(event.getCriteria());
+                : warehouse.getProducts(criteria);
 
         /* At step 1, the merchant cannot find available products.
             2.1 The merchant notifies the customer.*/
@@ -107,11 +111,11 @@ public class Merchant extends Actor {
             say(new NoProductsAvailableEvent(this, this.name(), event.from())
                     .setRequestId(event.getRequestId())
                     .setAccessToken(event.getAccessToken()));
-            rememberOccurrence("No Products found for criteria", event.getCriteria().getJsonCriteria());
+            rememberOccurrence("No Products found for criteria", criteria.getJsonCriteria());
         }
         else {
             if (optionalProducts.isEmpty()) {
-                storefront.addProducts(event.getCriteria(), products);
+                storefront.addProducts(criteria, products);
             }
         }
 
@@ -370,10 +374,11 @@ public class Merchant extends Actor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductsRequest = (event -> {
-        var evt = (ViewProductsEvent) event;
+        var evt = event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
+//        final Merchant ths = (Merchant) event.getTarget().get();
 
-        evt.addProducts((List<Product>) ths.showProducts(evt));
+        evt.payload().put("products", (List<Product>) ths.showProducts(evt));
         evt.reply(ths.name());
         ths.say(evt);
 
@@ -444,14 +449,14 @@ public class Merchant extends Actor {
 
     @Override
     protected void on24hours() {
-        var advertiser = vicinity().findActor("Advertiser");
+/*        var advertiser = vicinity().findActor("Advertiser");
         if (StringUtils.isNotEmpty(advertiser)) {
             say(new AcquireCrossSellProductsEvent(this, name(), advertiser));
         }
         else {
             log.warn("Advertiser not found");
             announce(new ActorNotFoundEvent(this, name(), SecurityGuard.VICINITY_MONITOR));
-        }
+        }*/
     }
 
     @Override

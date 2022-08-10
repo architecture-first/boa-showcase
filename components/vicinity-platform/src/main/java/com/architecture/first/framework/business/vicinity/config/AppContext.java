@@ -1,4 +1,4 @@
-package com.architecture.first.framework.technical.config;
+package com.architecture.first.framework.business.vicinity.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

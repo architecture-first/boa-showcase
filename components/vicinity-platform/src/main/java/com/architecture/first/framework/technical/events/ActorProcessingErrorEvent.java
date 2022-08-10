@@ -2,7 +2,7 @@ package com.architecture.first.framework.technical.events;
 
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 
@@ -15,7 +15,7 @@ public class ActorProcessingErrorEvent extends ArchitectureFirstEvent implements
     private String exceptionMessage;
 
     public ActorProcessingErrorEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ActorProcessingErrorEvent", from, to);
     }
 
     /**

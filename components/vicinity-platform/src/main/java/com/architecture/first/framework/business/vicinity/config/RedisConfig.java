@@ -1,4 +1,4 @@
-package com.architecture.first.framework.technical.config;
+package com.architecture.first.framework.business.vicinity.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -10,7 +10,7 @@ public class InvalidTokenEvent extends ArchitectureFirstEvent implements ErrorEv
     public static final String REASON = "reason";
 
     public InvalidTokenEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "InvalidTokenEvent", from, to);
     }
 
     public InvalidTokenEvent(Object source, ArchitectureFirstEvent eventToReplyTo) {

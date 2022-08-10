@@ -5,14 +5,11 @@ import com.architecture.first.framework.business.vicinity.events.Acknowledgement
 import com.architecture.first.framework.business.vicinity.events.AnonymousOkEvent;
 import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
 import com.architecture.first.framework.business.vicinity.vault.Vault;
-import com.architecture.first.framework.security.events.AccessRequestEvent;
-import com.architecture.first.framework.security.events.SecurityIncidentEvent;
-import com.architecture.first.framework.security.events.UserAccessRequestEvent;
-import com.architecture.first.framework.security.events.UserTokenRequestEvent;
+import com.architecture.first.framework.security.events.*;
 import com.architecture.first.framework.security.model.Credentials;
 import com.architecture.first.framework.security.model.Token;
 import com.architecture.first.framework.security.model.UserToken;
-import com.architecture.first.framework.technical.config.AppContext;
+import com.architecture.first.framework.business.vicinity.config.AppContext;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.architecture.first.framework.technical.events.CheckupEvent;
 import io.jsonwebtoken.*;
@@ -24,10 +21,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -35,7 +35,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @Service
-public class SecurityGuard extends Actor {
+public class SecurityGuard extends SecurityActor {
     @Autowired
     private static ApplicationContext applicationContext;
 
@@ -211,12 +211,20 @@ public class SecurityGuard extends Actor {
         return ((Double)jws.getBody().get("userId")).longValue();
     }
 
+    public static List<String> NON_SECURED_EVENTS = new ArrayList<>(List.of(new String[]{
+            "AccessRequestEvent", "AcknowledgementEvent", "AnonymousOkEvent", "CheckupEvent", "ErrorEvent"
+    }));
+
     /**
      * Determines if the event passes validation and can be sent in the Vicinity
      * @param event
      * @return true if the event is valid
      */
     public static boolean isOkToProceed(ArchitectureFirstEvent event) {
+        if (NON_SECURED_EVENTS.contains(event.type())) {
+            return true;
+        }
+
         return event instanceof ErrorEvent || event instanceof AccessRequestEvent
                 || event instanceof CheckupEvent || event instanceof AcknowledgementEvent
                 || event instanceof AnonymousOkEvent
@@ -252,7 +260,8 @@ public class SecurityGuard extends Actor {
     public static ArchitectureFirstEvent replyToSender(ArchitectureFirstEvent event) {
         Actor actor = determineTargetActor(event);
 
-        var incident = new SecurityIncidentEvent(actor, SECURITY_GUARD,  event.from(), event);
+        var incident = new SecurityIncidentEvent(actor, SECURITY_GUARD,  event.from(), event)
+                .setAsRequiresAcknowledgement(false);
 
         return actor.say(incident);
     }
@@ -282,11 +291,13 @@ public class SecurityGuard extends Actor {
         event.setHasErrors(true);
 
         var incident = new SecurityIncidentEvent(actor, SECURITY_GUARD,  VICINITY_MONITOR, event);
+        incident.setAsRequiresAcknowledgement(false);
         incident.setMessage(message);
         incident.setHasErrors(true);
 
         return actor.announce(incident);
     }
+
 
     public static String getRequestId() {
         return RandomStringUtils.randomAlphanumeric(requestIdSize);

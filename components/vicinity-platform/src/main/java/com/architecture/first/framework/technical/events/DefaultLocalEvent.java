@@ -10,7 +10,7 @@ public class DefaultLocalEvent extends ArchitectureFirstEvent implements LocalEv
      * @param requestId
      */
     public DefaultLocalEvent(String requestId) {
-        super("default", "default", "default");
+        super("default", "DefaultLocalEvent", "default", "default");
         setRequestId(requestId);
     }
 

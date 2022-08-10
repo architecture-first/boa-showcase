@@ -14,7 +14,7 @@ public class TokenRequestEvent extends ArchitectureFirstEvent implements AccessR
     }
 
     public TokenRequestEvent(Object source, String from, List<String> to, ArchitectureFirstEvent originalEvent) {
-        super(source, from, to, originalEvent);
+        super(source, "TokenRequestEvent", from, to, originalEvent);
     }
 
     public TokenRequestEvent(Object source, String from, String to) {
@@ -22,7 +22,7 @@ public class TokenRequestEvent extends ArchitectureFirstEvent implements AccessR
     }
 
     public TokenRequestEvent(Object source, String from, String to, ArchitectureFirstEvent originalEvent) {
-        super(source, from, to, originalEvent);
+        super(source, "TokenRequestEvent", from, to, originalEvent);
     }
 
     public TokenRequestEvent setToken(Token token) {

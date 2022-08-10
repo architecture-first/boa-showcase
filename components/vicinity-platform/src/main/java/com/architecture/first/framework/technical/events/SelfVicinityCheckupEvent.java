@@ -8,6 +8,6 @@ import com.architecture.first.framework.business.actors.Actor;
 public class SelfVicinityCheckupEvent extends ArchitectureFirstEvent implements CheckupEvent {
 
     public SelfVicinityCheckupEvent(Actor actor) {
-        super(actor, actor.name(), actor.name());
+        super(actor, "SelfVicinityCheckupEvent", actor.name(), actor.name());
     }
 }

@@ -8,7 +8,7 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class ActorEnteredEvent extends ArchitectureFirstEvent {
 
     public ActorEnteredEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "ActorEnteredEvent", from, to);
         setAsProcessLaterIfNoActorFound(false);
     }
 

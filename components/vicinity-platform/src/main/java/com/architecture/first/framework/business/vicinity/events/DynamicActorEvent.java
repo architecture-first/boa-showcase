@@ -8,10 +8,10 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class DynamicActorEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public DynamicActorEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "DynamicActorEvent",  from, to);
     }
 
     public DynamicActorEvent(Object source, String from, String to, ArchitectureFirstEvent event) {
-        super(source, from, to, event);
+        super(source, "DynamicActorEvent", from, to, event);
     }
 }

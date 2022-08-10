@@ -5,6 +5,7 @@ vicinity:
     root-path: ${TASKLIST_ROOT_PATH}
   external:
     root-path: ${EXTERNAL_CALLS_ROOT_PATH}
+  url: ${VICINITY_URL}
 identity-provider:
   private-key: ${PASS_KEY}
 

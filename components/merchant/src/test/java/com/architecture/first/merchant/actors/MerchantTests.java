@@ -1,9 +1,8 @@
 package com.architecture.first.merchant.actors;
 
 import com.architecture.first.framework.business.retail.events.*;
-import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
-import com.architecture.first.framework.business.vicinity.Vicinity;
+import com.architecture.first.framework.business.vicinity.VicinityServer;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.security.events.UserTokenReplyEvent;
 import com.architecture.first.framework.security.events.UserTokenRequestEvent;
@@ -11,7 +10,6 @@ import com.architecture.first.framework.security.model.UserToken;
 import com.architecture.first.framework.technical.aop.RequestContext;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.architecture.first.framework.technical.events.BeginTerminationEvent;
-import com.architecture.first.framework.business.retail.model.cashier.model.inventory.Product;
 import com.architecture.first.framework.technical.events.DefaultLocalEvent;
 import com.architecture.first.framework.technical.user.UserInfo;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ class MerchantTests {
     MerchantForTesting merchant;
 
     @Autowired
-    Vicinity vicinity;
+    VicinityServer vicinityServer;
 
     @Autowired
     private ApplicationEventPublisher publisher;

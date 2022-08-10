@@ -8,8 +8,9 @@ import com.architecture.first.framework.business.actors.external.behavior.Logic;
 import com.architecture.first.framework.business.actors.external.behavior.script.model.PipelineEntry;
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.acknowledgement.Acknowledgement;
-import com.architecture.first.framework.business.vicinity.bulletinboard.BulletinBoard;
-import com.architecture.first.framework.business.vicinity.bulletinboard.BulletinBoardStatus;
+import com.architecture.first.framework.security.events.SecurityHolderEvent;
+import com.architecture.first.framework.technical.bulletinboard.BulletinBoard;
+import com.architecture.first.framework.technical.bulletinboard.BulletinBoardStatus;
 import com.architecture.first.framework.business.vicinity.conversation.Conversation;
 import com.architecture.first.framework.business.vicinity.events.*;
 import com.architecture.first.framework.business.vicinity.locking.Lock;
@@ -29,6 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -48,17 +51,16 @@ import java.util.function.Predicate;
 
 @Slf4j
 @EnableScheduling
+@EnableAspectJAutoProxy(exposeProxy = true)
 /**
  * The main component of the platform.
  * The Actor is business focused, proactive, intelligent, robust and handles adversity.
  * The combination of Actors make a system or application.
  * One Actor can support multiple applications and projects.
  */
-public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
+public class Actor {
     public static final int NUM_CONNECTIONS = 1;
     public static final String PROJECT = "PROJECT";
-    @Autowired
-    private ApplicationEventPublisher publisher;
 
     @Autowired
     private BulletinBoard bulletinBoard;
@@ -134,13 +136,13 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
     @PostConstruct
     protected void init() {
         actorId = UUID.randomUUID().toString();
-        log.info("actorId: " + name());
 
         MY_VICINITY_STATUS = VICINITY_STATUS + group();
         MY_ACTOR_NOTES = ACTOR_NOTES + group();
 
         // support blue/green deployment and feature management
         setupProjectIfExists();
+        log.info("actorId: " + name());
 
         // register to hear events
         registerBehavior("VicinityConnectionBroken", Actor.noticeVicinityConnectionBroken);
@@ -156,8 +158,8 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
         registerBehavior("ActorResume", Actor.noticeActorResumeRequest);
 
         // subscribe to events
-        vicinity.subscribe(this, name());   // subscribe to my event
-        vicinity.subscribe(this, group());  // subscribe to a group event
+        vicinity.subscribe(this, name(), Actor::onApplicationEvent);   // subscribe to my event
+        vicinity.subscribe(this, group(), Actor::onApplicationEvent);  // subscribe to a group event
 
         // notify all that the actor is getting ready to receive events.
         bulletinBoardStatus = new BulletinBoardStatus(
@@ -174,7 +176,7 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
      * Determine if current Actor is a Security Guard
      * @return true if Security Guard
      */
-    private boolean isSecurityGuard() {
+    public boolean isSecurityGuard() {
         return this.name().contains("SecurityGuard");
     }
 
@@ -1032,7 +1034,7 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
     protected void publishEvent(ArchitectureFirstEvent event) {
         log.info("Publishing event: " + event);
         event.setAsHandled(false);
-        publisher.publishEvent(event);
+        vicinity.onApplicationEvent(event);
     }
 
     /**
@@ -1233,7 +1235,7 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
 
     /**
      * Apply desired dynamic lagic
-     * @param name of desired logic
+     * @param s - name of desired logic
      */
     private void applyLogic(String s) {
         logic.apply(s, new DynamicActorEvent(this, name(), name())
@@ -1394,17 +1396,16 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
      * Potentially perform an action if an event is directed to this Actor
      * @param event
      */
-    @Override
-    public void onApplicationEvent(ArchitectureFirstEvent event) {
-        if (event.isLocal() || this != event.getSource()) {    // do not receive an event from self unless a whisper
+    public static Void onApplicationEvent(Actor actor, ArchitectureFirstEvent event) {
+        if (event.isLocal() || actor != event.getSource()) {    // do not receive an event from self unless a whisper
             event.to().forEach(t -> {
                 if (StringUtils.isNotEmpty(t)) {
-                    if (t.equalsIgnoreCase(this.name())    // message is targeted to this actor
-                            || t.equalsIgnoreCase(this.getClass().getSimpleName()) // message is targeted to any actor in group
+                    if (t.equalsIgnoreCase(actor.name())    // message is targeted to this actor
+                            || t.equalsIgnoreCase(actor.getClass().getSimpleName()) // message is targeted to any actor in group
                             || t.equalsIgnoreCase(ArchitectureFirstEvent.EVENT_ALL_PARTICIPANTS)) { // event is targeted to any actor
-                        if (!event.isAnnouncement() || (event.isAnnouncement() && !event.from().equals(name()))) {
+                        if (!event.isAnnouncement() || (event.isAnnouncement() && !event.from().equals(actor.name()))) {
                             log.info("Receiving event: " + new Gson().toJson(event));
-                            hear(event);
+                            actor.hear(event);
                         }
                     }
                 } else {
@@ -1414,6 +1415,8 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
                 }
             });
         }
+
+        return null;
     }
 
     /**
@@ -1542,7 +1545,7 @@ public class Actor implements ApplicationListener<ArchitectureFirstEvent> {
         VicinityConnectionBrokenEvent evt = (VicinityConnectionBrokenEvent) event;
 
         // Resubscribe
-        evt.getVicinity().subscribe(evt.getTarget().get(), evt.getTargetOwner());
+        evt.getVicinity().subscribe(evt.getTarget().get(), evt.getTargetOwner(), Actor::onApplicationEvent);
 
         return event.getTarget().get();
     });

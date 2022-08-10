@@ -9,7 +9,7 @@ import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 public class VicinityConnectionBrokenEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public VicinityConnectionBrokenEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "VicinityConnectionBrokenEvent", from, to);
     }
 
     /**

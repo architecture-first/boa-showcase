@@ -8,7 +8,7 @@ import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
 public class BeginTerminationEvent extends ArchitectureFirstEvent implements ErrorEvent {
 
     public BeginTerminationEvent(Object source, String from, String to) {
-        super(source, from, to);
+        super(source, "BeginTerminationEvent", from, to);
     }
 
 }

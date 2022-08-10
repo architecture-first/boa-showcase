@@ -1,6 +1,7 @@
 package com.architecture.first.framework.technical.events;
 
 import com.architecture.first.framework.business.actors.Actor;
+import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.technical.util.SimpleModel;
@@ -29,6 +30,8 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public static final String BOA_PROJECT = "boa-project";
     public static String EVENT_ALL_PARTICIPANTS = "all";
 
+    private String name = "ArchitectureFirstEvent";
+    private String type = "AnonymousOkEvent";
     private SimpleModel header = new SimpleModel();
     private SimpleModel payload = new SimpleModel();
     private String message = "";
@@ -53,12 +56,14 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     /**
      * Create an event
      * @param source
+     * @param name
      * @param from
      * @param to
      * @param originalEvent
      */
-    public ArchitectureFirstEvent(Object source, String from, List<String> to, ArchitectureFirstEvent originalEvent) {
+    public ArchitectureFirstEvent(Object source, String name, String from, List<String> to, ArchitectureFirstEvent originalEvent) {
         super(source);
+        this.name = name;
         header.put(FROM, from);
         header.put(TO, to);
         if (originalEvent != null) {
@@ -73,11 +78,12 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     /**
      * Create an event
      * @param source
+     * @param name
      * @param from
      * @param to
      */
-    public ArchitectureFirstEvent(Object source, String from, List<String> to) {
-        this(source, from, to, null);
+    public ArchitectureFirstEvent(Object source, String name, String from, List<String> to) {
+        this(source, name, from, to, null);
     }
 
 
@@ -87,28 +93,30 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @param eventToReplyTo
      */
     public ArchitectureFirstEvent(Object source, ArchitectureFirstEvent eventToReplyTo) {
-        this(source, eventToReplyTo.toFirst(), eventToReplyTo.from(), eventToReplyTo);
+        this(source, eventToReplyTo.name(), eventToReplyTo.toFirst(), eventToReplyTo.from(), eventToReplyTo);
     }
 
     /**
      *Create an event
      * @param source
+     * @param name
      * @param from
      * @param to
      */
-    public ArchitectureFirstEvent(Object source, String from, String to) {
-        this(source, from, new ArrayList<String>(Collections.singletonList(to)), null);
+    public ArchitectureFirstEvent(Object source, String name, String from, String to) {
+        this(source, name, from, new ArrayList<String>(Collections.singletonList(to)), null);
     }
 
     /**
      * Create an event
      * @param source
+     * @param name
      * @param from
      * @param to
      * @param originEvent
      */
-    public ArchitectureFirstEvent(Object source, String from, String to, ArchitectureFirstEvent originEvent) {
-        this(source, from, new ArrayList<String>(Collections.singletonList(to)), originEvent);
+    public ArchitectureFirstEvent(Object source, String name, String from, String to, ArchitectureFirstEvent originEvent) {
+        this(source, name, from, new ArrayList<String>(Collections.singletonList(to)), originEvent);
     }
 
     /**
@@ -137,10 +145,22 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public Optional<Actor> getTarget() {return target;}
 
     /**
+     * Returns whether there is a target actor
+     * @return boolean - true if a target actor exists
+     */
+    public boolean hasTargetActor() {return target != null && target.isPresent();}
+
+    /**
+     * Returns the type of the event
+     * @return
+     */
+    public String type() {return type;}
+
+    /**
      * Returns the name of the event
      * @return
      */
-    public String name() {return getClass().getSimpleName();}
+    public String name() {return StringUtils.isNotEmpty(name) ? name : getClass().getSimpleName();}
 
     /**
      * Returns the subject of the event
@@ -443,7 +463,13 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * Returns whether the event or related processing has errors
      * @return true if the event or related processing has errors
      */
-    public boolean hasErrors() {return isLocalEvent;}
+    public boolean hasErrors() {return hasErrors;}
+
+    /**
+     * Returns whether the event or related processing has errors
+     * @return true if the event or related processing has errors
+     */
+    public boolean isErrorEvent() {return "ErrorEvent".equals(type) || this instanceof ErrorEvent;}
 
     /**
      * Returns the index that the event is by order in the UnAck (unacknowledged) or Ack (acknowledged) event list
@@ -669,8 +695,33 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      */
     public static ArchitectureFirstEvent from(Object source, VicinityMessage message) {
         try {
-            var cls = Class.forName(message.getHeader().getEventType());
-            ArchitectureFirstEvent event = new Gson().fromJson(message.getJsonPayload(), (Type) cls);
+            var eventType = message.getHeader().getEventType();
+            if (eventType != null) {
+                if (Character.isUpperCase(eventType.charAt(0))) {
+                    return from(message);
+                }
+                else {
+                    var cls = Class.forName(message.getHeader().getEventType());
+                    ArchitectureFirstEvent event = new Gson().fromJson(message.getJsonPayload(), (Type) cls);
+                    return event;
+                }
+            }
+
+        } catch (Exception e) {
+            log.warn("Invalid class definition: ", e);
+        }
+
+        return from(message);
+    }
+
+    /**
+     * Convert a Vicinity message to a generic ArchitectureFirstEvent
+     * @param message
+     * @return return ArchitectureFirstEvent object or null if error
+     */
+    public static ArchitectureFirstEvent from(VicinityMessage message) {
+        try {
+            ArchitectureFirstEvent event = new Gson().fromJson(message.getJsonPayload(), ArchitectureFirstEvent.class);
 
             return event;
         } catch (Exception e) {
@@ -688,7 +739,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @return return ArchitectureFirstEvent object or null if error
      */
     public static ArchitectureFirstEvent fromForReplyWithoutPayload(Object source, String from, ArchitectureFirstEvent originalEvent) {
-        ArchitectureFirstEvent replyEvent = new ArchitectureFirstEvent(source, from, originalEvent.from());
+        ArchitectureFirstEvent replyEvent = new ArchitectureFirstEvent(source, originalEvent.type(), from, originalEvent.from());
         replyEvent.setOriginalEvent(originalEvent);
 
         return replyEvent;

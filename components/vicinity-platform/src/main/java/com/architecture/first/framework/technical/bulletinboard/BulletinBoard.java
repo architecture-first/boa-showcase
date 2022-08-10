@@ -1,4 +1,4 @@
-package com.architecture.first.framework.business.vicinity.bulletinboard;
+package com.architecture.first.framework.technical.bulletinboard;
 
 import com.architecture.first.framework.technical.cache.JedisHCursor;
 import com.architecture.first.framework.technical.util.DateUtils;
