@@ -1,5 +1,6 @@
 package com.architecture.first.framework.business.retail.model.vendor.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.retail.events.*;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.retail.model.merchant.Delivery;
@@ -15,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class Vendor extends Actor {
+public class Vendor extends BusinessActor {
     @Autowired
     private Queue queue;
 

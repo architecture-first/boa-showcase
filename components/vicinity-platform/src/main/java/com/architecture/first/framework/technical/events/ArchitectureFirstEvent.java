@@ -6,6 +6,11 @@ import com.architecture.first.framework.business.vicinity.messages.VicinityMessa
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.technical.util.SimpleModel;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEvent;
@@ -36,6 +41,8 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     private SimpleModel payload = new SimpleModel();
     private String message = "";
     private transient Optional<Actor> target = Optional.empty();
+    private transient Gson gson;
+    private transient Configuration gsonConfig;
     private boolean isPropagatedFromVicinity = false;
     private boolean isLocalEvent = false;
     private boolean isAnnouncement = false;
@@ -155,6 +162,17 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @return
      */
     public String type() {return type;}
+
+    /**
+     * Returns whether the event is a certain name
+     * @return
+     */
+    public boolean isNamed(String name) {return this.name.equals(name) || this.getClass().getSimpleName().equals(name);}
+
+
+    public boolean isType(Type type) {
+        return this.type.equals(type.getTypeName());
+    }
 
     /**
      * Returns the name of the event
@@ -651,6 +669,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     }
 
     private ArchitectureFirstEvent initArchitectureFirstEvent(ArchitectureFirstEvent originalEvent) {
+        setRequestId(originalEvent.getRequestId());
         setAccessToken(originalEvent.getAccessToken());
         if (originalEvent.header().containsKey(BOA_CONN)) {
             addHeader(BOA_CONN, (String) originalEvent.header().get(BOA_CONN));
@@ -677,6 +696,104 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      */
     public String getRequestId() {return (String) this.header().get(REQUEST_ID);}
 
+    /**
+     * Convert this object to JSON form
+     * @return
+     */
+    private String getCurrentJson() {
+        if (gson == null) {
+            initGson();
+        }
+        return gson.toJson(this);
+    }
+
+    private void initGson() {
+        gson = new Gson();
+        gsonConfig = Configuration
+                .builder()
+                .mappingProvider(new JacksonMappingProvider())
+                .jsonProvider(new JacksonJsonProvider())
+                .build();
+    }
+
+    /**
+     * Returns an Object from a JSON string
+     * @param jsonPath - JSON Path
+     * @param classType
+     * @return
+     */
+    public Object getValueAs(String jsonPath, Type classType) {
+        if (gson == null) {
+            initGson();
+        }
+
+        var currentJson = getCurrentJson();    // convert current object
+        var results = JsonPath.using(gsonConfig).parse(currentJson).read(jsonPath, (Class<? extends Object>) classType);
+
+        return results;
+    }
+
+    /**
+     * Returns an Object from a JSON string
+     * @param jsonPath - JSON Path
+     * @return
+     */
+    public Object getValue(String jsonPath) {
+        return getValueAs(jsonPath, Object.class);
+    }
+
+
+    /**
+     * Returns a header entry
+     * @param root
+     * @param classType
+     * @return
+     */
+    public Object getHeaderValueAs(String root, Type classType) {
+        return getValueAs("$.header." + root, classType);
+    }
+
+    public Object getHeaderValue(String root) {
+        return getHeaderValueAs(root, Object.class);
+    }
+
+    /**
+     * Returns a payload entry
+     * @param root
+     * @param classType
+     * @return
+     */
+    public Object getPayloadValueAs(String root, Type classType) {
+        return getValueAs("$.payload." + root, classType);
+    }
+
+    /**
+     * Returns a payload entry
+     * @param root
+     * @param classType - should be a list type, such as new TypeToken<List<Product>>(){}.getType()
+     * @return
+     */
+    public Object getPayloadListValueAs(String root, Type classType) {
+        var rawList = getPayloadValue(root);
+        var json = new Gson().toJson(rawList);
+        return gson.fromJson(json, classType);
+    }
+
+    /**
+     * Returns a payload entry
+     * @param root
+     * @return
+     */
+    public Object getPayloadValue(String root) {
+        return getPayloadValueAs(root, Object.class);
+    }
+
+    @Override
+    public String toString() {
+        return getCurrentJson();
+    }
+    
+    
     // Lifecycle events (start)
 
     /**

@@ -1,5 +1,6 @@
 package com.architecture.first.framework.business.retail.model.cashier.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.retail.events.*;
 import com.architecture.first.framework.business.retail.model.cashier.CashierApplication;
 import com.architecture.first.framework.business.retail.model.cashier.model.PaymentInfo;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class Cashier extends Actor {
+public class Cashier extends BusinessActor {
 
     @Autowired
     private OrderRepository checkout;

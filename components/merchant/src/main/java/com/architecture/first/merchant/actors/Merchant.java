@@ -13,7 +13,6 @@ import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
 import com.architecture.first.framework.business.retail.storefront.Storefront;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
-import com.architecture.first.framework.business.vicinity.events.ActorNotFoundEvent;
 import com.architecture.first.framework.business.vicinity.locking.Lock;
 import com.architecture.first.framework.business.vicinity.tasklist.TaskTracking;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -24,12 +23,10 @@ import com.architecture.first.merchant.MerchantApplication;
 import com.architecture.first.merchant.repository.InventoryRepository;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -97,7 +94,7 @@ public class Merchant extends BusinessActor {
 
     @TaskTracking(task = "merchant/ShowProducts", defaultParentTask = "customer/ViewProducts")
     public List<? extends IProduct> showProducts(ArchitectureFirstEvent event) {
-        var criteria = (ShowProductsCriteria) event.payload().get("criteria");
+        var criteria = (ShowProductsCriteria) event.getPayloadValueAs("criteria", ShowProductsCriteria.class); //event.payload().get("criteria");
         // Try to get products from storefront.  If they are not there then get from warehouse
         var optionalProducts = storefront.getProducts(criteria, Product.class);
         var products =  (optionalProducts.isPresent())

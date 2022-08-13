@@ -136,7 +136,7 @@ public class VicinityProxy implements Vicinity {
 
         if (!event.isLocal() && !(event instanceof LocalEvent)) { // local events don't leave this process
             if (!event.isPropagatedFromVicinity()) { // don't echo back out events
-                log.info("Receiving event: " + event);
+                log.info("Receiving event: " + event.toString());
 
                 if (SecurityGuard.isOkToProceed(event)) {
                     try {

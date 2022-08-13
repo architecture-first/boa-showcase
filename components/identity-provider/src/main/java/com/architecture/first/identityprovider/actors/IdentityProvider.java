@@ -1,5 +1,6 @@
 package com.architecture.first.identityprovider.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.vicinity.vault.Vault;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -27,7 +28,7 @@ import static com.architecture.first.framework.security.SecurityGuard.SECURITY_U
 
 @Slf4j
 @Service
-public class IdentityProvider extends Actor {
+public class IdentityProvider extends BusinessActor {
 
     private final IdentityRepository userList;
     private final SecurityGuard securityGuard;

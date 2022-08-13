@@ -1,5 +1,6 @@
 package com.architecture.first.framework.business.retail.model.dynamic.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.actors.external.behavior.script.model.PipelineEntry;
 import com.architecture.first.framework.business.retail.events.*;
 import com.architecture.first.framework.business.actors.Actor;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class DynamicActor extends Actor {
+public class DynamicActor extends BusinessActor {
 
     @Value("${actor.dynamic.group}")
     private String groupName;

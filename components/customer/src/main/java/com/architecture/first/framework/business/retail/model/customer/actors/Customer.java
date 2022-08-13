@@ -1,5 +1,6 @@
 package com.architecture.first.framework.business.retail.model.customer.actors;
 
+import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.actors.exceptions.ActorException;
 import com.architecture.first.framework.business.hub.ClientCommunication;
@@ -24,6 +25,7 @@ import com.architecture.first.framework.technical.events.ActorProcessingErrorEve
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.architecture.first.framework.technical.events.DefaultLocalEvent;
 import com.architecture.first.framework.technical.util.SimpleModel;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.aop.framework.AopContext;
@@ -44,7 +46,7 @@ import static com.architecture.first.framework.business.hub.ClientCommunication.
 
 @Slf4j
 @Service
-public class Customer extends Actor {
+public class Customer extends BusinessActor {
 
     private final CustomerRepository repository;
     private final ClientCommunication client;
@@ -71,17 +73,15 @@ public class Customer extends Actor {
     public List<Product> viewProducts(ArchitectureFirstEvent localEvent, ShowProductsCriteria criteria) {
         SimpleModel returnData = new SimpleModel();
 
-        var event = new ViewProductsEvent(this, name(), "Merchant")
-                .setCriteria(criteria)
-                .setRequestId(localEvent.getRequestId())
-                .setAccessToken(localEvent.getAccessToken())
+        var event = new ArchitectureFirstEvent(this, "ViewProductsEvent", name(), "Merchant")
                 .shouldAwaitResponse(true)
                 .initFromDefaultEvent(localEvent);
+        event.payload().put("criteria", criteria);
 
         say(event, response -> {
-            if (response instanceof ViewProductsEvent) {
-                var evt = (ViewProductsEvent) response;
-                returnData.put("products", evt.getProducts());
+            if (response.isNamed("ViewProductsEvent")) {
+                var evt = response;
+                returnData.put("products", evt.getPayloadListValueAs("products", new TypeToken<List<Product>>(){}.getType()));
                 log.info("products have arrived");
                 return true;
             }
@@ -404,13 +404,12 @@ public class Customer extends Actor {
         );
     }
 
-    protected long notifyOfProducts(ViewProductsEvent event) {
-          event.header().put("path","hub/customer/view-products");
+    protected long notifyOfProducts(ArchitectureFirstEvent event) {
+        event.header().put("path","hub/customer/view-products");
         event.setTo(ClientCommunication.CLIENT);
-        event.payload().put("products", event.getProducts());
         client.say(event);
 
-        return event.getProducts().size();
+        return 0;
     }
 
     protected CartItem notifyOfProduct(ViewProductEvent event) {
@@ -432,9 +431,9 @@ public class Customer extends Actor {
     }
 
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductsResponse = (event -> {
-        var evt = (ViewProductsEvent) event;
+        var evt = event;
 
-        log.info("products have been received " + evt.getProducts().size());
+        log.info("products have been received " + evt.getPayloadValue("products"));
 
         final Customer ths = (Customer) AopContext.currentProxy();
         ths.notifyOfProducts(evt);
