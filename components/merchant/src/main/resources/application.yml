@@ -1,6 +1,7 @@
 server:
   port: 8082
 vicinity:
+  name: local-vicinity
   task-list:
     root-path: ${TASKLIST_ROOT_PATH}
   external:

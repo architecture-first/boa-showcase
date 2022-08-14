@@ -1,7 +1,9 @@
 package com.architecture.first.framework.business.vicinity.todo;
 
+import ch.qos.logback.core.html.NOPThrowableRenderer;
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.acknowledgement.Acknowledgement;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.technical.cache.JedisHCursor;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.google.gson.Gson;
@@ -31,6 +33,8 @@ public class ToDoList {
         }
     }
 
+    public static long NOT_EXECUTED = -1l;
+
     @Autowired
     private JedisPooled jedis;
 
@@ -39,6 +43,9 @@ public class ToDoList {
 
     @Autowired
     private Vicinity vicinity;
+
+    @Autowired
+    private VicinityInfo vicinityInfo;
 
     private final Gson gson = new Gson();
 
@@ -52,8 +59,12 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long addTask(String group, String key, long position) {
-        var entry = new ToDoListEntry(group, key, position);
-        return jedis.hset(generateSignature(group), entry.toString(), Status.Pending.status);
+        if (isEnabled()) {
+            var entry = new ToDoListEntry(group, key, position);
+            return jedis.hset(generateSignature(group), entry.toString(), Status.Pending.status);
+        }
+
+        return NOT_EXECUTED;
     }
 
     /**
@@ -62,12 +73,16 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long addTask(ArchitectureFirstEvent event) {
-        event.setAsToDoTask(true);
+        if (isEnabled()) {
+            event.setAsToDoTask(true);
 
-        var entry = new ToDoListEntry(event.toFirstGroup(), event.getRequestId(), event.index());
-        event.setToDoLink(entry.toString());
+            var entry = new ToDoListEntry(event.toFirstGroup(), event.getRequestId(), event.index());
+            event.setToDoLink(entry.toString());
 
-        return jedis.hset(generateSignature(event.toFirstGroup()), entry.toString(), Status.Pending.status);
+            return jedis.hset(generateSignature(event.toFirstGroup()), entry.toString(), Status.Pending.status);
+        }
+
+        return NOT_EXECUTED;
     }
 
     /**
@@ -76,10 +91,14 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long completeTask(ArchitectureFirstEvent event) {
-        ack.recordAcknowledgement(event);
-        jedis.hdel(generateSignature(event.toFirstGroup()), event.getToDoLink());  // delete if not owned
-        var entry = new ToDoListEntry(event.getTarget().get().name(), event.getRequestId(), event.index());
-        return jedis.hdel(generateSignature(event.toFirstGroup()), entry.toString());
+        if (isEnabled()) {
+            ack.recordAcknowledgement(event);
+            jedis.hdel(generateSignature(event.toFirstGroup()), event.getToDoLink());  // delete if not owned
+            var entry = new ToDoListEntry(event.getTarget().get().name(), event.getRequestId(), event.index());
+            return jedis.hdel(generateSignature(event.toFirstGroup()), entry.toString());
+        }
+
+        return NOT_EXECUTED;
     }
 
     /**
@@ -88,7 +107,11 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long failTask(ArchitectureFirstEvent event) {
-        return jedis.hset(generateSignature(event.toFirstGroup()), event.getToDoLink(), Status.Failed.status);
+        if (isEnabled()) {
+            return jedis.hset(generateSignature(event.toFirstGroup()), event.getToDoLink(), Status.Failed.status);
+        }
+
+        return NOT_EXECUTED;
     }
 
     /**
@@ -98,7 +121,11 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long reassignTask(String group, String key) {
-        return jedis.hset(generateSignature(group), key, Status.Pending.status);
+        if (isEnabled()) {
+            return jedis.hset(generateSignature(group), key, Status.Pending.status);
+        }
+
+        return NOT_EXECUTED;
     }
 
     /**
@@ -108,54 +135,57 @@ public class ToDoList {
      * @return 1 if successful
      */
     public long closeTask(String group, String key) {
-        return jedis.hdel(generateSignature(group), key);
+        if (isEnabled()) {
+            return jedis.hdel(generateSignature(group), key);
+        }
+
+        return NOT_EXECUTED;
     }
 
     // Note: has side effects
     public Optional<ArchitectureFirstEvent> acquireAvailableTask(String group, String requestor) {
-        AtomicReference<ToDoListEntry> ref = new AtomicReference<>();
+        if (isEnabled()) {
+            AtomicReference<ToDoListEntry> ref = new AtomicReference<>();
 
-        var cursor = new JedisHCursor(jedis);
-        var signature = generateSignature(group);
-        cursor.processAll(signature, e -> {
-            var entry = ToDoListEntry.from(e.getKey());
-            if (ref.get() == null && e.getValue().equals(Status.Pending.toString())) {
-                ref.set(entry);
-                return true;
-            }
-            else if (!entry.hasOwner() || (entry.hasOwner() && !vicinity.actorIsAvailable(entry.getOwner()))) {
+            var cursor = new JedisHCursor(jedis);
+            var signature = generateSignature(group);
+            cursor.processAll(signature, e -> {
+                var entry = ToDoListEntry.from(e.getKey());
+                if (ref.get() == null && e.getValue().equals(Status.Pending.toString())) {
+                    ref.set(entry);
+                    return true;
+                } else if (!entry.hasOwner() || (entry.hasOwner() && !vicinity.actorIsAvailable(entry.getOwner()))) {
+                    var event = ack.getUnacknowledgedEvent(entry.getKey(), String.valueOf(entry.getIndex()));
+                    if (event != null) {
+                        reassignTask(entry.getGroup(), e.getKey());
+                    } else {
+                        closeTask(entry.getGroup(), e.getKey());
+                    }
+                }
+
+                return false;
+            });
+
+            if (ref.get() != null) {
+                var entry = ref.get();
                 var event = ack.getUnacknowledgedEvent(entry.getKey(), String.valueOf(entry.getIndex()));
-                if (event != null){
-                    reassignTask(entry.getGroup(), e.getKey());
+                if (event != null) {        // there may be no events to process
+                    if (StringUtils.isNotEmpty(entry.getOwner())) {
+                        event.setOriginalActorName(entry.getOwner());
+                    }
+                    event.shouldAwaitResponse(false);
+
+                    jedis.hdel(signature, entry.toString());
+                    entry.setOwner(requestor);
+                    jedis.hset(signature, entry.toString(), Status.InProgress.status);
+
+                    return Optional.of(event);
+                } else {
+                    closeTask(entry.getGroup(), entry.toString());
                 }
-                else {
-                    closeTask(entry.getGroup(), e.getKey());
-                }
+
+                return Optional.empty();
             }
-
-            return false;
-        });
-
-        if (ref.get() != null) {
-            var entry = ref.get();
-            var event = ack.getUnacknowledgedEvent(entry.getKey(), String.valueOf(entry.getIndex()));
-            if (event != null) {        // there may be no events to process
-                if (StringUtils.isNotEmpty(entry.getOwner())) {
-                    event.setOriginalActorName(entry.getOwner());
-                }
-                event.shouldAwaitResponse(false);
-
-                jedis.hdel(signature, entry.toString());
-                entry.setOwner(requestor);
-                jedis.hset(signature, entry.toString(), Status.InProgress.status);
-
-                return Optional.of(event);
-            }
-            else {
-                closeTask(entry.getGroup(), entry.toString());
-            }
-
-            return Optional.empty();
         }
 
         return Optional.empty();
@@ -168,5 +198,9 @@ public class ToDoList {
      */
     private String generateSignature(String group) {
         return String.format("%s:%s",TO_DO_LIST, group);
+    }
+
+    private boolean isEnabled() {
+        return vicinityInfo.getTodo().equals(VicinityInfo.VALUE_ENABLED);
     }
 }

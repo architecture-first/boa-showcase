@@ -2,6 +2,7 @@ package com.architecture.first.framework.business.vicinity.config;
 
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.VicinityProxy;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,4 +20,5 @@ public class VicinityConfig {
     public Vicinity vicinity() {
         return new VicinityProxy();
     }
+
 }

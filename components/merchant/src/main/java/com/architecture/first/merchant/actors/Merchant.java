@@ -13,6 +13,7 @@ import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
 import com.architecture.first.framework.business.retail.storefront.Storefront;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
+import com.architecture.first.framework.business.vicinity.events.ActorNotFoundEvent;
 import com.architecture.first.framework.business.vicinity.locking.Lock;
 import com.architecture.first.framework.business.vicinity.tasklist.TaskTracking;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -105,7 +106,7 @@ public class Merchant extends BusinessActor {
             2.1 The merchant notifies the customer.*/
         // Note: This will also notify other interested customers in the vicinity
         if (products.size() == 0) {
-            say(new NoProductsAvailableEvent(this, this.name(), event.from())
+            say(new ArchitectureFirstEvent(this, "NoProductsAvailableEvent", this.name(), event.from())
                     .setRequestId(event.getRequestId())
                     .setAccessToken(event.getAccessToken()));
             rememberOccurrence("No Products found for criteria", criteria.getJsonCriteria());
@@ -121,11 +122,12 @@ public class Merchant extends BusinessActor {
 
     // M08-Show-ProductF
     @TaskTracking(task = "merchant/ShowProduct", defaultParentTask = "customer/ViewProduct")
-    public CartItem showProduct(ViewProductEvent event) {
-        var optionalProduct = storefront.getProduct(event.getProductId(), Product.class);
+    public CartItem showProduct(ArchitectureFirstEvent event) {
+        var productId = (Long) event.getPayloadValueAs("productId", Long.class);
+        var optionalProduct = storefront.getProduct(productId, Product.class);
         var product = (optionalProduct.isPresent())
                                 ? (Product) optionalProduct.get()
-                                : warehouse.getProductById(event.getProductId());
+                                : warehouse.getProductById(productId);
 
         Merchant ths = (Merchant) AopContext.currentProxy();
         ths.suggestProductsForCustomer(event);
@@ -181,27 +183,26 @@ public class Merchant extends BusinessActor {
 
     // M06 - Suggest Products
     @TaskTracking(task = "merchant/SuggestProducts")
-    protected void suggestProductsForCustomer(ViewProductEvent event) {
+    protected void suggestProductsForCustomer(ArchitectureFirstEvent event) {
+        var productId = (Long) event.getPayloadValueAs("productId", Long.class);
         Long customerId = (event.hasAccessToken())
                 ? SecurityGuard.getUserId(event.getAccessToken())
                 : 0;
-        String suggestedProductsKey = "SuggestedProductsFor_" + customerId + "_" + event.getProductId();
+        String suggestedProductsKey = "SuggestedProductsFor_" + customerId + "_" + productId;
         Class<? extends ArrayList> clss = new ArrayList<InventorySuggestedProductsResult>().getClass();
 
         // Try to recall suggested products. If data is not there then get the products and then remember.
         var suggestedProducts = recall(suggestedProductsKey, clss).isPresent() ?
                 recall(suggestedProductsKey, clss).get()
-                : findSuggestedProductsForCustomer(event, customerId, event.getProductId());
+                : findSuggestedProductsForCustomer(event, customerId, productId);
 
         if (exists(suggestedProducts)) {
             // Remember the suggested products for a while (also saves a backend call)
             remember(suggestedProductsKey, suggestedProducts, clss);
 
             // Inform the customer or others listening
-            say(new SuggestedProductsEvent(this, name(), event.from())
-                    .addProducts(suggestedProducts)
-                    .setRequestId(event.getRequestId())
-                    .setAccessToken(event.getAccessToken())
+            say(new ArchitectureFirstEvent(this, "SuggestedProductsEvent", name(), event.from())
+                    .apply((afe, sp) -> (ArchitectureFirstEvent) afe.payload().put("suggestedProducts", sp), suggestedProducts)
                     .setOriginalEvent(event)
             );
         }
@@ -213,7 +214,7 @@ public class Merchant extends BusinessActor {
         return warehouse.removeReservation(productId, unitsBackordered);
     }
 
-    protected List<InventorySuggestedProductsResult> findSuggestedProductsForCustomer(ViewProductEvent event, Long customerId, Long productId) {
+    protected List<InventorySuggestedProductsResult> findSuggestedProductsForCustomer(ArchitectureFirstEvent event, Long customerId, Long productId) {
         var suggestedProducts = warehouse.getSuggestedProducts(customerId, productId, numberOfOrdersToAnalyze, numberOfProductsToSuggest);
 
         return suggestedProducts.stream().map(s -> {
@@ -371,24 +372,21 @@ public class Merchant extends BusinessActor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductsRequest = (event -> {
-        var evt = event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
-//        final Merchant ths = (Merchant) event.getTarget().get();
 
-        evt.payload().put("products", (List<Product>) ths.showProducts(evt));
-        evt.reply(ths.name());
-        ths.say(evt);
+        event.payload().put("products", ths.showProducts(event));
+        event.reply(ths.name());
+        ths.say(event);
 
         return ths;
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductRequest = (event -> {
-        var evt = (ViewProductEvent) event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        evt.setProduct(ths.showProduct(evt));
-        evt.reply(ths.name());
-        ths.say(evt);
+        event.addPayloadValue("suggestedProducts", ths.showProduct(event));
+        event.reply(ths.name());
+        ths.say(event);
 
         return ths;
     });

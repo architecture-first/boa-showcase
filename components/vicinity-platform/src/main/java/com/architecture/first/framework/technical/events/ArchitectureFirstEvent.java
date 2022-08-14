@@ -13,10 +13,13 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.arch.Processor;
 import org.springframework.context.ApplicationEvent;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * The core event for communication in the Vicinity and in process
@@ -742,6 +745,16 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
         return getValueAs(jsonPath, Object.class);
     }
 
+    /**
+     * Add a value to the header
+     * @param name
+     * @param value
+     * @return
+     */
+    public ArchitectureFirstEvent addHeaderValue(String name, Object value) {
+        header().put(name, value);
+        return this;
+    }
 
     /**
      * Returns a header entry
@@ -753,8 +766,24 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
         return getValueAs("$.header." + root, classType);
     }
 
+    /**
+     * Returns a header value
+     * @param root
+     * @return
+     */
     public Object getHeaderValue(String root) {
         return getHeaderValueAs(root, Object.class);
+    }
+
+    /**
+     * Adds a payload value
+     * @param name
+     * @param value
+     * @return
+     */
+    public ArchitectureFirstEvent addPayloadValue(String name, Object value) {
+        payload().put(name, value);
+        return this;
     }
 
     /**
@@ -792,8 +821,37 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public String toString() {
         return getCurrentJson();
     }
-    
-    
+
+    // Dynamic methods (start)
+    private transient HashMap<String, BiFunction<ArchitectureFirstEvent, Object, ArchitectureFirstEvent>> fnSetters = new HashMap();
+    public ArchitectureFirstEvent addSetterFunction(String name, BiFunction<ArchitectureFirstEvent, Object, ArchitectureFirstEvent> fnSetter) {
+        fnSetters.put(name, fnSetter);
+        return this;
+    }
+
+    public ArchitectureFirstEvent apply(BiFunction<ArchitectureFirstEvent, Object, ArchitectureFirstEvent> fnSetter, Object param) {
+        fnSetter.apply(this, param);
+        return this;
+    }
+    public ArchitectureFirstEvent apply(String name, String param) {
+        fnSetters.get(name).apply(this, param);
+        return this;
+    }
+
+    private transient HashMap<String, Function<ArchitectureFirstEvent, Object>> fnGetters = new HashMap();
+    public ArchitectureFirstEvent addGetterFunction(String name, Function<ArchitectureFirstEvent, Object> fnGetter) {
+        fnGetters.put(name, fnGetter);
+        return this;
+    }
+
+    public Object apply(Function<ArchitectureFirstEvent, Object> fnGetter) {
+        return fnGetter.apply(this);
+    }
+    public Object apply(String name) {
+        return fnGetters.get(name).apply(this);
+    }
+    // Dynamic methods (end)
+
     // Lifecycle events (start)
 
     /**

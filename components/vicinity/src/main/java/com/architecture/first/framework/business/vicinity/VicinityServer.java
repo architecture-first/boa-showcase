@@ -3,6 +3,7 @@ package com.architecture.first.framework.business.vicinity;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.vicinity.conversation.Conversation;
 import com.architecture.first.framework.business.vicinity.exceptions.VicinityException;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import com.architecture.first.framework.business.vicinity.threading.VicinityConnections;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -19,14 +20,10 @@ import redis.clients.jedis.Jedis;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * The Vicinity class is the main communication vehicle between Actors.
@@ -49,6 +46,9 @@ public class VicinityServer implements Vicinity {
     private VicinityProxy vicinityProxy;
 
     @Autowired
+    private VicinityInfo vicinityInfo;
+
+    @Autowired
     private Conversation convo;
 
     @Value("${redis.host}")
@@ -58,6 +58,14 @@ public class VicinityServer implements Vicinity {
     private int port;
 
     private final Map<String, VicinityConnections> taskGroups = new HashMap<>();
+
+    /**
+     * Initializes the Vicinity
+     */
+    @PostConstruct
+    public void onVicinityEnvironmentInit() {
+
+    }
 
     /**
      * Creates a new thread to manage Vicinity tasks
@@ -107,45 +115,45 @@ public class VicinityServer implements Vicinity {
 
         if (!event.isLocal() && !(event instanceof LocalEvent)) { // local events don't leave this process
             if (!event.isPropagatedFromVicinity()) { // don't echo back out events
-                log.info("Receiving event: " + event);
+                if (onVicinityReceiveEvent(event)) {
 
-                if (SecurityGuard.isOkToProceed(event)) {
-                    try (Jedis jedisDedicated = new Jedis(host, port)) {
-                        event.to().forEach(t -> {
-                            if (StringUtils.isNotEmpty(t)) {
-                                if (!event.hasTargetActor() || (event.hasTargetActor() && !t.equals(event.getTarget().get().name()))) {
-                                    VicinityMessage message = generateMessage(event, t);
+                    if (onVicinityEventSecurityCheck(event)) {
+                        try (Jedis jedisDedicated = new Jedis(host, port)) {
+                            event.to().forEach(t -> {
+                                if (StringUtils.isNotEmpty(t)) {
+                                    if (!event.hasTargetActor() || (event.hasTargetActor() && !t.equals(event.getTarget().get().name()))) {
+                                        var message = onVicinityBeforePublishMessage(event, t);
 
-                                    String channel = channelFor(t);
-                                    var jsonEvent = new Gson().toJson(event);
-                                    log.info("Published Event to Vicinity: " + channel + " message: " + jsonEvent);
-                                    convo.record(event, Conversation.Status.SendingViaVicinity);
+                                        onVicinityRecordConvo(event);
+                                        String channel = onVicinityPublishMessage(jedisDedicated, message);
 
-                                    jedisDedicated.publish(channel, message.toString());
-
-                                    if (event.isErrorEvent()) {      // send error events to vicinity monitor as well as the caller
-                                        if (!event.toFirst().equals(SecurityGuard.VICINITY_MONITOR)) {
-                                            log.info("Published Event to Vicinity Monitor: " + channel + " " + event.getRequestId());
-                                            jedisDedicated.publish(channelFor(SecurityGuard.VICINITY_MONITOR), message.toString());
+                                        onVicinityAfterPublishMessage(channel, message);
+                                        if (event.isErrorEvent()) {      // send error events to vicinity monitor as well as the caller
+                                            onVicinityError(jedisDedicated, event, channel, message);
                                         }
                                     }
+                                } else {
+                                    onVicinityEmptyTarget(event);
                                 }
-                            } else {
-                                String msg = "to: is empty on message: " + event.getMessage();
-                                log.info(msg);
-                                throw new VicinityException(msg);
-                            }
-                        });
-                    } catch (Exception e) {
-                        // TODO - handle threading errors.
-                        log.error("Message error:", e);
+                            });
+                        } catch (Exception e) {
+                            onVicinityProcessingException(e);
+                        }
+                    } else {
+                        onVicinitySecurityGuardRejectedEvent(event);
                     }
-                } else {
-                    processInvalidToken(event);
                 }
+                onVicinityReceivedEventBlocked(event);
+            }
+            else {
+                onVicinityAlreadyPropagatedEvent(event);
             }
         }
+        else {
+            onVicinityLocalEventIgnored(event);
+        }
     }
+
 
     /**
      * Generates a Vicinity message from and event
@@ -176,8 +184,12 @@ public class VicinityServer implements Vicinity {
      * Process a VicinityMessage
      */
     public void publishVicinityMessage(VicinityMessage message) {
-        ArchitectureFirstEvent event = ArchitectureFirstEvent.from(this, message);
+        onVicinityReceiveRawMessage(message);
+        var event = onVicinityCreateArchitectureFirstEvent(this, message);
+
+        onVicinityAfterCreateArchitectureFirstEvent(event);
         onApplicationEvent(event);
+        onVicinityAfterProcessArchitectureFirstEvent(event);
     }
 
     /**
@@ -252,4 +264,88 @@ public class VicinityServer implements Vicinity {
         return "channel: " + name;
     }
 
+    // Lifecycle events (start)
+    private void onVicinityAfterProcessArchitectureFirstEvent(ArchitectureFirstEvent event) {
+    }
+
+    private ArchitectureFirstEvent onVicinityCreateArchitectureFirstEvent(VicinityServer vicinityServer, VicinityMessage message) {
+        return ArchitectureFirstEvent.from(this, message);
+    }
+
+    private void onVicinityAfterCreateArchitectureFirstEvent(ArchitectureFirstEvent event) {
+    }
+
+    private void onVicinityReceiveRawMessage(VicinityMessage message) {
+    }
+
+    private void onVicinityReceivedEventBlocked(ArchitectureFirstEvent event) {
+        log.info("Message blocked: " + event.toString());
+    }
+
+    private void onVicinityProcessingException(Exception e) {
+        // TODO - handle threading errors.
+        log.error("Message error:", e);
+    }
+
+    private void onVicinityEmptyTarget(ArchitectureFirstEvent event) {
+        String msg = "to: is empty on message: " + event.getMessage();
+        log.info(msg);
+        throw new VicinityException(msg);
+    }
+
+    private void onVicinityError(Jedis jedis, ArchitectureFirstEvent event, String channel, VicinityMessage message) {
+        if (!event.toFirst().equals(SecurityGuard.VICINITY_MONITOR)) {
+            log.info("Published Event to Vicinity Monitor: " + channel + " " + event.getRequestId());
+            jedis.publish(channelFor(SecurityGuard.VICINITY_MONITOR), message.toString());
+        }
+    }
+
+    private void onVicinityAfterPublishMessage(String channel, VicinityMessage message) {
+        log.info("Published Event to Vicinity: " + channel + " message: " + message);
+    }
+
+    private String onVicinityPublishMessage(Jedis jedis, VicinityMessage message) {
+        String channel = channelFor(message.to());
+        jedis.publish(channel, message.toString());
+
+        return channel;
+    }
+
+    private VicinityMessage onVicinityBeforePublishMessage(ArchitectureFirstEvent event, String t) {
+        return generateMessage(event, t);
+    }
+
+    private void onVicinityRecordConvo(ArchitectureFirstEvent event) {
+        convo.record(event, Conversation.Status.SendingViaVicinity);
+    }
+
+    private boolean onVicinityReceiveEvent(ArchitectureFirstEvent event) {
+        log.info("Receiving event: " + event);
+
+        if (event.name().equals("ActorEnteredEvent")) {
+            if (vicinityInfo.getActorEnteredEvent().equals(VicinityInfo.VALUE_DISABLED)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean onVicinityEventSecurityCheck(ArchitectureFirstEvent event) {
+        return SecurityGuard.isOkToProceed(event);
+    }
+
+    private void onVicinitySecurityGuardRejectedEvent(ArchitectureFirstEvent event) {
+        processInvalidToken(event);
+    }
+
+    private void onVicinityAlreadyPropagatedEvent(ArchitectureFirstEvent event) {
+        log.warn("Local event already propagated: " + event);
+    }
+
+    private void onVicinityLocalEventIgnored(ArchitectureFirstEvent event) {
+        log.warn("Local event ignored: " + event);
+    }
+
+    // Lifecycle events (end)
 }

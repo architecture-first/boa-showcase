@@ -1,6 +1,7 @@
 server:
   port: 8084
 vicinity:
+  name: local-vicinity
   host: ${VICINITY_HOST}
   port: ${VICINITY_PORT}
   task-list:

@@ -412,13 +412,12 @@ public class Customer extends BusinessActor {
         return 0;
     }
 
-    protected CartItem notifyOfProduct(ViewProductEvent event) {
+    protected CartItem notifyOfProduct(ArchitectureFirstEvent event) {
         event.header().put("path","hub/customer/view-product");
         event.setTo(ClientCommunication.CLIENT);
-        event.payload().put("product", event.getProduct());
         client.say(event);
 
-        return event.getProduct();
+        return CartItem.from((Product) event.getPayloadValueAs("product", Product.class));
     }
 
     private SystemInfo validateChange(SystemInfo systemInfo, long numUpdates,
@@ -441,12 +440,10 @@ public class Customer extends BusinessActor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductResponse = (event -> {
-        var evt = (ViewProductEvent) event;
-
-        log.info("product has been received " + evt.getProduct().getProductId());
+        log.info("product has been received " + event.getPayloadValueAs("product.productId", Long.class));
 
         final Customer ths = (Customer) AopContext.currentProxy();
-        ths.notifyOfProduct(evt);
+        ths.notifyOfProduct(event);
         return ths;
     });
 

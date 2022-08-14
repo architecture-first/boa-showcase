@@ -2,14 +2,11 @@ package com.architecture.first.framework.business.vicinity.controller;
 
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.VicinityServer;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,7 +25,7 @@ public class VicinityController {
     private VicinityServer vicinityServer;
 
     @Autowired
-    private ApplicationEventPublisher publisher;
+    private VicinityInfo vicinityInfo;
 
     @PostMapping("message/send")
     public Integer send(@RequestBody VicinityMessage message) {
@@ -41,6 +38,11 @@ public class VicinityController {
         }
 
         return 200;
+    }
+
+    @GetMapping("info")
+    public VicinityInfo getInfo() {
+        return vicinityInfo;
     }
 
 }

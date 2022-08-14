@@ -2,6 +2,7 @@ package com.architecture.first.framework.business.vicinity.acknowledgement;
 
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.events.AcknowledgementEvent;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import com.architecture.first.framework.technical.cache.JedisHCursor;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
@@ -34,6 +35,7 @@ public class Acknowledgement {
     }
 
     public static final String INDEX = "index";
+    public static long NOT_EXECUTED = -1l;
 
     public class Entry {
         private final String classname;
@@ -56,6 +58,10 @@ public class Acknowledgement {
 
     @Autowired
     private Vicinity vicinity;
+
+    @Autowired
+    private VicinityInfo vicinityInfo;
+
     private final String ackConnectionId = UUID.randomUUID().toString();
 
     /**
@@ -64,22 +70,26 @@ public class Acknowledgement {
      * @return the item number of the event
      */
     public long recordUnacknowledgedEvent(ArchitectureFirstEvent event) {
-        if ((event.name().equals("SelfVicinityCheckupEvent"))) {
-            return 0;
+        if (isEnabled()) {
+            if ((event.name().equals("SelfVicinityCheckupEvent"))) {
+                return 0;
+            }
+
+            var ack = generateHandle(event.getRequestId(), Status.Unacknowledged);
+            var index = jedis.hincrBy(ack, INDEX, 1);
+            event.setIndex(index);
+            event.setOriginalActorName(event.toFirst());
+            var message = vicinity.generateMessage(event, event.toFirst());
+
+            // note: these calls should be in a transaction
+
+            jedis.hset(ack, String.valueOf(index), message.toString());
+            jedis.expire(ack, expirationSeconds);
+
+            return index;
         }
 
-        var ack = generateHandle(event.getRequestId(), Status.Unacknowledged);
-        var index = jedis.hincrBy(ack, INDEX, 1);
-        event.setIndex(index);
-        event.setOriginalActorName(event.toFirst());
-        var message = vicinity.generateMessage(event, event.toFirst());
-
-        // note: these calls should be in a transaction
-
-        jedis.hset(ack, String.valueOf(index), message.toString());
-        jedis.expire(ack, expirationSeconds);
-
-        return index;
+        return NOT_EXECUTED;
     }
 
     /**
@@ -88,8 +98,10 @@ public class Acknowledgement {
      * @param index
      */
     public void removeUnacknowledgedEvent(String requestId, long index) {
-        var ack = generateHandle(requestId, Status.Unacknowledged);
-        jedis.hdel(ack, String.valueOf(index));
+        if (isEnabled()) {
+            var ack = generateHandle(requestId, Status.Unacknowledged);
+            jedis.hdel(ack, String.valueOf(index));
+        }
     }
 
     /**
@@ -98,30 +110,34 @@ public class Acknowledgement {
      * @return
      */
     public long recordAcknowledgement(ArchitectureFirstEvent event) {
-        if (event.name().equals("SelfVicinityCheckupEvent") || event.name().equals("AcknowledgementEvent")) {
-            return 0;
+        if (isEnabled()) {
+            if (event.name().equals("SelfVicinityCheckupEvent") || event.name().equals("AcknowledgementEvent")) {
+                return 0;
+            }
+
+            var ack = generateHandle(event.getRequestId(), Status.Acknowledged);
+            var actor = event.getTarget().get();
+            var message = vicinity.generateMessage(event, event.toFirst());
+
+            // note: these calls should be in a transaction
+            var index = event.index();
+            if (!jedis.hexists(ack, String.valueOf(index))) {
+                jedis.hset(ack, String.valueOf(index), message.toString());
+                jedis.expire(ack, expirationSeconds);
+
+                removeUnacknowledgedEvent(event.getRequestId(), event.index());
+
+                // To and From reversed for acknowledgement
+                var ackEvent = new AcknowledgementEvent(this, event.toFirst(), event.from())
+                        .setAcknowledgementEvent(event);
+                var ackMessage = vicinity.generateMessage(ackEvent, event.from());
+                vicinity.publishMessage(ackEvent.toFirst(), ackMessage.toString());
+            }
+
+            return index;
         }
 
-        var ack = generateHandle(event.getRequestId(), Status.Acknowledged);
-        var actor = event.getTarget().get();
-        var message = vicinity.generateMessage(event, event.toFirst());
-
-        // note: these calls should be in a transaction
-        var index = event.index();
-        if (!jedis.hexists(ack, String.valueOf(index))) {
-            jedis.hset(ack, String.valueOf(index), message.toString());
-            jedis.expire(ack, expirationSeconds);
-
-            removeUnacknowledgedEvent(event.getRequestId(), event.index());
-
-            // To and From reversed for acknowledgement
-            var ackEvent = new AcknowledgementEvent(this, event.toFirst(), event.from())
-                    .setAcknowledgementEvent(event);
-            var ackMessage = vicinity.generateMessage(ackEvent, event.from());
-            vicinity.publishMessage(ackEvent.toFirst(), ackMessage.toString());
-        }
-
-        return index;
+        return NOT_EXECUTED;
     }
 
     /**
@@ -131,12 +147,14 @@ public class Acknowledgement {
      * @return
      */
     public ArchitectureFirstEvent getUnacknowledgedEvent(String requestId, String index) {
-        var ack = generateHandle(requestId, Status.Unacknowledged);
-        var json = jedis.hget(ack, index);
-        if (StringUtils.isNotEmpty(json)) {
-            var message = VicinityMessage.from(json);
+        if (isEnabled()) {
+            var ack = generateHandle(requestId, Status.Unacknowledged);
+            var json = jedis.hget(ack, index);
+            if (StringUtils.isNotEmpty(json)) {
+                var message = VicinityMessage.from(json);
 
-            return ArchitectureFirstEvent.from(this, message);
+                return ArchitectureFirstEvent.from(this, message);
+            }
         }
 
         return null;
@@ -159,22 +177,30 @@ public class Acknowledgement {
      * @return
      */
     public boolean hasAcknowledged(String requestId, String eventName) {
-        var ack = generateHandle(requestId, Status.Acknowledged);
+        if (isEnabled()) {
+            var ack = generateHandle(requestId, Status.Acknowledged);
 
-        AtomicBoolean hasPassed = new AtomicBoolean(false);
+            AtomicBoolean hasPassed = new AtomicBoolean(false);
 
-        var cursor = new JedisHCursor(jedis);
-        cursor.processAll(ack, e -> {
-            var vicinityMessage = VicinityMessage.from(e.getValue());
-            var event = (AcknowledgementEvent) ArchitectureFirstEvent.from(this, vicinityMessage);
-            if (event.getAcknowledgedEventName().equals(eventName)) {
-                hasPassed.set(true);
-                return true;
-            }
+            var cursor = new JedisHCursor(jedis);
+            cursor.processAll(ack, e -> {
+                var vicinityMessage = VicinityMessage.from(e.getValue());
+                var event = (AcknowledgementEvent) ArchitectureFirstEvent.from(this, vicinityMessage);
+                if (event.getAcknowledgedEventName().equals(eventName)) {
+                    hasPassed.set(true);
+                    return true;
+                }
 
-            return false;
-        });
+                return false;
+            });
 
-        return hasPassed.get();
+            return hasPassed.get();
+        }
+
+        return false;
+    }
+
+    private boolean isEnabled() {
+        return vicinityInfo.getAcknowledgement().equals(VicinityInfo.VALUE_ENABLED);
     }
  }

@@ -3,9 +3,9 @@ package com.architecture.first.framework.business.vicinity;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.actors.exceptions.ActorException;
 import com.architecture.first.framework.business.vicinity.conversation.Conversation;
-import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
 import com.architecture.first.framework.business.vicinity.events.VicinityConnectionBrokenEvent;
 import com.architecture.first.framework.business.vicinity.exceptions.VicinityException;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import com.architecture.first.framework.business.vicinity.threading.VicinityConnections;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
@@ -41,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * The Vicinity class is the main communication vehicle between Actors.
@@ -75,6 +73,9 @@ public class VicinityProxy implements Vicinity {
 
     @Autowired
     private Conversation convo;
+
+    @Autowired
+    private VicinityInfo vicinityInfo;
 
     @Value("${redis.host}")
     private String redisHost;
@@ -111,11 +112,13 @@ public class VicinityProxy implements Vicinity {
                                     new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
-     * Peforms Vicinity initialization
+     * Performs Vicinity initialization
      */
     @PostConstruct
     protected void init() {
-
+        if (!vicinityProcessType.equals("server")) {
+            vicinityInfo = getInfo("api/vicinity/info");
+        }
     }
 
     /**
@@ -489,6 +492,38 @@ public class VicinityProxy implements Vicinity {
         requestBuilder.POST((requestBody == null || requestBody.isEmpty())
                 ? HttpRequest.BodyPublishers.noBody()
                 : HttpRequest.BodyPublishers.ofString(requestBody));
+
+        var request = requestBuilder.build();
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private VicinityInfo getInfo(String path) {
+        return new Gson().fromJson(getInfo(path, null).body(), VicinityInfo.class);
+    }
+
+    private HttpResponse<String> getInfo(String path, SimpleModel headers) {
+        var fullPath = String.format("%s/%s", vicinityUrl, path);
+
+        var requestBuilder = HttpRequest
+                .newBuilder()
+                .uri(URI.create(fullPath))
+                .header("Content-Type","application/json");
+
+        if (headers != null && headers.size() > 0) {
+            headers.entrySet().stream()
+                    .filter(h -> h.getValue() instanceof String)
+                    .forEach(h -> requestBuilder.headers(h.getKey(), (String) h.getValue()));
+        }
+
+        requestBuilder.GET();
 
         var request = requestBuilder.build();
 
