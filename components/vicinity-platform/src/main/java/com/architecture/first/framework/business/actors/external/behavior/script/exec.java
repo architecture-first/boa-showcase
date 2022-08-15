@@ -64,6 +64,7 @@ public class exec extends Command {
     private boolean executeSay() {
         var actor = getScript().getInitialEvent().getTarget().get();
         ArchitectureFirstEvent event = generateEvent(say);
+        event.setName(getScript().getInitialEvent().name());
         processResults(event);
 
         var evt = (say.isAwaitResponse())
@@ -148,6 +149,7 @@ public class exec extends Command {
         var qualifiedName = getScript().getDefinition(communication.getName());
         var cls = getClass(qualifiedName);
         var event = (ArchitectureFirstEvent) getInstanceFromScript(communication, communication.getClass(), cls);
+
         event.setOriginalEvent(getScript().getInitialEvent());
 
         if (StringUtils.isNotEmpty(communication.getFrom())) {

@@ -201,7 +201,7 @@ public class CustomerRepository {
             return -1;
         }
 
-        long customerNumber = ticketNumber.next("customerId", n -> {
+        long customerNumber = ticketNumber.next("userId", n -> {
             return getTopCustomerId();
         });
 

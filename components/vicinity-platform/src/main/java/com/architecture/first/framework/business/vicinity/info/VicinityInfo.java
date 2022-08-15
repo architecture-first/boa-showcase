@@ -29,13 +29,13 @@ public class VicinityInfo {
     @Value("${vicinity.name:local-vicinity}")
     private String name;
 
-    @Value("${vicinity.env.to-do:enabled}")
+    @Value("${vicinity.env.to-do:disabled}")
     private String todo;
 
-    @Value("${vicinity.env.acknowledgement:enabled}")
+    @Value("${vicinity.env.acknowledgement:disabled}")
     private String acknowledgement;
 
-    @Value("${vicinity.env.actor-entered-event:enabled}")
+    @Value("${vicinity.env.actor-entered-event:disabled}")
     private String actorEnteredEvent;
 
 }

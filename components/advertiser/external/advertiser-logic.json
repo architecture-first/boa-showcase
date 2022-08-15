@@ -1,9 +1,9 @@
 {
   "define": {
-    "AcquireCrossSellProducts": "com.architecture.first.framework.business.retail.events.AcquireCrossSellProductsEvent",
-    "CrossSellsUpdated": "com.architecture.first.framework.business.retail.events.CrossSellsUpdatedEvent",
-    "AcknowledgeImpression": "com.architecture.first.framework.business.retail.events.AcknowledgeImpressionEvent",
-    "UpdateAvailability": "com.architecture.first.framework.business.retail.events.UpdateAvailabilityEvent"
+    "AcquireCrossSellProducts": "com.architecture.first.framework.technical.events.AcquireCrossSellProductsEvent",
+    "CrossSellsUpdated": "com.architecture.first.framework.technical.events.CrossSellsUpdatedEvent",
+    "AcknowledgeImpression": "com.architecture.first.framework.technical.events.AcknowledgeImpressionEvent",
+    "UpdateAvailability": "com.architecture.first.framework.technical.events.UpdateAvailabilityEvent"
   },
   "declare": {
     "brand-value": "'Ray-ban'"

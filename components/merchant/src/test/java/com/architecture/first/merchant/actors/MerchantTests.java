@@ -61,8 +61,8 @@ class MerchantTests {
 
     @Test
     void showProduct() {
-        var product = merchant.showProduct(new ViewProductEvent(this, "Tester", "Merchant")
-                .setProductId(1002l));
+        var product = merchant.showProduct(new ArchitectureFirstEvent(this, "ViewProductEvent", "Tester", "Merchant")
+                .setPayloadValue("productId", 1002l));
         Assert.notNull(product, "Product is empty");
     }
 

@@ -1,5 +1,6 @@
 package com.architecture.first.framework.business.retail.model.customer.actors;
 
+import ch.qos.logback.core.rolling.helper.ArchiveRemover;
 import com.architecture.first.framework.business.BusinessActor;
 import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.actors.exceptions.ActorException;
@@ -14,6 +15,7 @@ import com.architecture.first.framework.business.retail.model.customer.CustomerS
 import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
 import com.architecture.first.framework.business.retail.model.customer.cart.ShoppingCart;
 import com.architecture.first.framework.business.retail.model.customer.repository.CustomerRepository;
+import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
 import com.architecture.first.framework.business.vicinity.tasklist.TaskTracking;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.security.events.UserAccessRequestEvent;
@@ -25,6 +27,7 @@ import com.architecture.first.framework.technical.events.ActorProcessingErrorEve
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.architecture.first.framework.technical.events.DefaultLocalEvent;
 import com.architecture.first.framework.technical.util.SimpleModel;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.plexus.util.StringUtils;
@@ -35,9 +38,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,14 +126,14 @@ public class Customer extends BusinessActor {
     //C02 - Add Product to Cart
     @TaskTracking(task = "customer/AddProductToCart", defaultParentTask = "customer/AddProductToCart")
     public Optional<CartItem> addProductToCart(ArchitectureFirstEvent localEvent, CartItem product) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
-        var optCartItems = getShoppingCart(localEvent, customerId);
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        var optCartItems = getShoppingCart(localEvent, userId);
         if (optCartItems.isPresent()) {
-            var numUpdates = repository.addItemToExistingOrder(customerId, product);
+            var numUpdates = repository.addItemToExistingOrder(userId, product);
             validateChange(product, numUpdates,"E502", "Cannot add item to cart");
         }
         else {
-            var customerInfo = repository.getCustomerInfo(customerId);
+            var customerInfo = repository.getCustomerInfo(userId);
             if (customerInfo.isPresent()) {
                 var cart = new ShoppingCart();
                 cart.init(customerInfo.get());
@@ -145,12 +146,12 @@ public class Customer extends BusinessActor {
         return Optional.of(product);
     }
 
-    public Optional<ShoppingCart> getShoppingCart(ArchitectureFirstEvent localEvent, Long customerId) {
-        return repository.getShoppingCart(customerId);
+    public Optional<ShoppingCart> getShoppingCart(ArchitectureFirstEvent localEvent, Long userId) {
+        return repository.getShoppingCart(userId);
     }
 
-    public Optional<List<CartItem>> getShoppingCartItems(ArchitectureFirstEvent localEvent, Long customerId) {
-        var optCart = getShoppingCart(localEvent, customerId);
+    public Optional<List<CartItem>> getShoppingCartItems(ArchitectureFirstEvent localEvent, Long userId) {
+        var optCart = getShoppingCart(localEvent, userId);
         if (optCart.isPresent()) {
             // sum up quantities of like items
             var cartItems = optCart.get().getItems().stream().collect(
@@ -171,12 +172,12 @@ public class Customer extends BusinessActor {
     }
 
     public Optional<List<CartItem>> getShoppingCartItems(ArchitectureFirstEvent localEvent) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
-        return getShoppingCartItems(localEvent, customerId);
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        return getShoppingCartItems(localEvent, userId);
     }
 
-    public Optional<Order> getOrderPreview(ArchitectureFirstEvent localEvent, Long customerId) {
-        var order = repository.getOrderPreview(customerId);
+    public Optional<Order> getOrderPreview(ArchitectureFirstEvent localEvent, Long userId) {
+        var order = repository.getOrderPreview(userId);
         if (order == null) {
             return Optional.empty();
         }
@@ -192,12 +193,12 @@ public class Customer extends BusinessActor {
     }
 
     public Optional<Order> getOrderPreview(ArchitectureFirstEvent localEvent) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
-        return getOrderPreview(localEvent, customerId);
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        return getOrderPreview(localEvent, userId);
     }
 
-    public Optional<List<PurchaseItem>> getOrderPreviewItems(ArchitectureFirstEvent localEvent, Long customerId) {
-        var optCart = getOrderPreview(localEvent, customerId);
+    public Optional<List<PurchaseItem>> getOrderPreviewItems(ArchitectureFirstEvent localEvent, Long userId) {
+        var optCart = getOrderPreview(localEvent, userId);
         if (optCart.isPresent()) {
             List<PurchaseItem> cartItems = sumPurchaseItems(optCart.get().getPurchaseItems());
             return Optional.of(cartItems);
@@ -232,33 +233,33 @@ public class Customer extends BusinessActor {
     }
 
     public Optional<List<PurchaseItem>> getOrderPreviewItems(ArchitectureFirstEvent localEvent) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
-        return getOrderPreviewItems(localEvent, customerId);
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        return getOrderPreviewItems(localEvent, userId);
     }
 
     public Long checkout(ArchitectureFirstEvent localEvent) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
         final Customer ths = (Customer) AopContext.currentProxy();
-        if (repository.isCustomerRegistered(customerId)) {
-            return ths.checkoutAsRegisteredCustomer(localEvent, customerId);
+        if (repository.isCustomerRegistered(userId)) {
+            return ths.checkoutAsRegisteredCustomer(localEvent, userId);
         }
 
-        return ths.checkoutAsGuest(localEvent, customerId);
+        return ths.checkoutAsGuest(localEvent, userId);
     }
 
     public OrderConfirmation checkoutAndWait(ArchitectureFirstEvent localEvent) {
-        Long customerId = SecurityGuard.getUserId(localEvent.getAccessToken());
+        Long userId = SecurityGuard.getUserId(localEvent.getAccessToken());
         final Customer ths = (Customer) AopContext.currentProxy();
-        if (repository.isCustomerRegistered(customerId)) {
-            return ths.checkoutAsRegisteredCustomerAndWait(localEvent, customerId);
+        if (repository.isCustomerRegistered(userId)) {
+            return ths.checkoutAsRegisteredCustomerAndWait(localEvent, userId);
         }
 
-        return ths.checkoutAsGuestAndWait(localEvent, customerId);
+        return ths.checkoutAsGuestAndWait(localEvent, userId);
     }
 
     @TaskTracking(task = "customer/CheckoutAsRegisteredCustomer")
-    public Long checkoutAsRegisteredCustomer(ArchitectureFirstEvent localEvent, Long customerId) {
-        var optCart = repository.getShoppingCart(customerId);
+    public Long checkoutAsRegisteredCustomer(ArchitectureFirstEvent localEvent, Long userId) {
+        var optCart = repository.getShoppingCart(userId);
 
         if (optCart.isEmpty()) {
             // TODO - create shopping cart if not available
@@ -266,11 +267,10 @@ public class Customer extends BusinessActor {
         }
 
         var cart = optCart.get();
-        var event = new CheckoutRequestEvent(this, name(), Arrays.asList("Merchant","Cashier"))
-                .setCustomerId(cart.getUserId())
-                .setOrderNumber(cart.getOrderNumber())
-                .setShoppingCart(cart)
-                .setRequestId(localEvent.getRequestId())
+        var event = new ArchitectureFirstEvent(this, "CheckoutRequestEvent", name(), Arrays.asList("Merchant","Cashier"))
+                .setPayloadValue("userId", cart.getUserId())
+                .setPayloadValue("orderNumber", cart.getOrderNumber())
+                .setPayloadValue("shoppingCart", cart)
                 .initFromDefaultEvent(localEvent);
 
         say(event);
@@ -279,8 +279,8 @@ public class Customer extends BusinessActor {
     }
 
     @TaskTracking(task = "customer/CheckoutAsRegisteredCustomer")
-    public OrderConfirmation checkoutAsRegisteredCustomerAndWait(ArchitectureFirstEvent localEvent, Long customerId) {
-        var optCart = repository.getShoppingCart(customerId);
+    public OrderConfirmation checkoutAsRegisteredCustomerAndWait(ArchitectureFirstEvent localEvent, Long userId) {
+        var optCart = repository.getShoppingCart(userId);
 
         if (optCart.isEmpty()) {
             // TODO - create shopping cart if not available
@@ -290,19 +290,17 @@ public class Customer extends BusinessActor {
         SimpleModel returnData = new SimpleModel();
 
         var cart = optCart.get();
-        var event = new CheckoutRequestEvent(this, name(), Arrays.asList("Merchant","Cashier"))
-                .setCustomerId(cart.getUserId())
-                .setOrderNumber(cart.getOrderNumber())
-                .setShoppingCart(cart)
-                .setRequestId(localEvent.getRequestId())
+        var event = new ArchitectureFirstEvent(this, "CheckoutRequestEvent", name(), Arrays.asList("Merchant","Cashier"))
+                .setPayloadValue("userId", cart.getUserId())
+                .setPayloadValue("orderNumber", cart.getOrderNumber())
+                .setPayloadValue("shoppingCart", cart)
                 .shouldAwaitResponse(true)
                 .setAwaitTimeoutSeconds(60)
                 .initFromDefaultEvent(localEvent);
 
         say(event, response -> {
-                    if (response instanceof OrderConfirmationEvent) {
-                        var evt = (OrderConfirmationEvent) response;
-                        returnData.put("orderConfirmation", evt.getOrderConfirmation());
+                    if (response.isNamed("OrderConfirmationEvent")) {
+                        returnData.put("orderConfirmation", response.getPayloadValueAs("orderConfirmation", OrderConfirmation.class));
                         log.info("the order has been processed");
                         return true;
                     }
@@ -317,12 +315,12 @@ public class Customer extends BusinessActor {
     }
 
     @TaskTracking(task = "customer/CheckoutAsGuest")
-    public Long checkoutAsGuest(ArchitectureFirstEvent localEvent, Long customerId) {
+    public Long checkoutAsGuest(ArchitectureFirstEvent localEvent, Long userId) {
         throw new UnsupportedOperationException("This operation is not supported");
     }
 
     @TaskTracking(task = "customer/CheckoutAsGuest")
-    public OrderConfirmation checkoutAsGuestAndWait(ArchitectureFirstEvent localEvent, Long customerId) {
+    public OrderConfirmation checkoutAsGuestAndWait(ArchitectureFirstEvent localEvent, Long userId) {
         throw new UnsupportedOperationException("This operation is not supported");
     }
 
@@ -346,7 +344,7 @@ public class Customer extends BusinessActor {
      * Sign up customer
      * Note: has side-effects
      * @param signUp
-     * @return customerId and updated CustomerSignUp
+     * @return userId and updated CustomerSignUp
      */
     // C12 - Sign Up
     @TaskTracking(task = "customer/SignUp")
@@ -365,38 +363,54 @@ public class Customer extends BusinessActor {
 
     // C06 - View Suggested Products
     @TaskTracking(task = "customer/ViewSuggestedProducts", defaultParentTask = "customer/ViewProduct")
-    protected long viewSuggestedProducts(SuggestedProductsEvent event) {
-        log.info("suggested products size: " + event.getSuggestedProducts().size());
+    protected long viewSuggestedProducts(ArchitectureFirstEvent event) {
+        // List<InventorySuggestedProductsResult> getSuggestedProducts()
+
+        var suggestedProducts = new ArrayList<InventorySuggestedProductsResult>();
+        Gson gson = new Gson();
+
+        ((ArrayList<Object>) event.getPayloadValueAs("suggestedProducts", Object.class)).stream().forEach(hm -> {
+            var a = (Map<String,Object>) hm;
+            var str = gson.toJson(a);
+            suggestedProducts.add(gson.fromJson(str, InventorySuggestedProductsResult.class));
+        });
+
+        log.info("suggested products size: " + suggestedProducts.size());
         event.header().put("path","hub/customer/suggested-products");
         event.setTo(ClientCommunication.CLIENT);
-        event.payload().put("suggestedProducts", event.getSuggestedProducts());
+        event.payload().put("suggestedProducts", suggestedProducts);
         client.say(event);
 
-        return event.getSuggestedProducts().size();
+        return suggestedProducts.size();
     }
 
     // C05 - View Order Confirmation
     @TaskTracking(task = "customer/ViewOrderConfirmation", defaultParentTask = "customer/CheckoutAsRegisteredCustomer")
-    protected OrderConfirmation viewOrderConfirmation(OrderConfirmationEvent event) {
-        log.info("order confirmation arrived for: " + event.getCustomerId());
+    protected OrderConfirmation viewOrderConfirmation(ArchitectureFirstEvent event) {
+        log.info("order confirmation arrived for: " + event.getPayloadValueAs("userId", Long.class));
+        var orderConfirmation = (OrderConfirmation) event.getPayloadValueAs("orderConfirmation", OrderConfirmation.class);
+
+        client.say(event);
 
         event.header().put("path","hub/customer/order-confirmation");
         event.setTo(ClientCommunication.CLIENT);
-        event.payload().put("orderConfirmation", event.getOrderConfirmation());
-        client.say(event);
+        event.payload().put("orderConfirmation", orderConfirmation);
 
-        return event.getOrderConfirmation();
+        return orderConfirmation;
     }
 
     // C04 - Provide Payment
     @TaskTracking(task = "customer/ProvidePayment", defaultParentTask = "customer/CheckoutAsRegisteredCustomer")
-    protected void providePayment(RequestPaymentEvent requestPaymentEvent) {
-        log.info("asked to provide payment for: " + requestPaymentEvent.getCustomerId());
+    protected void providePayment(ArchitectureFirstEvent requestPaymentEvent) {
+        var userId = (Long) requestPaymentEvent.getPayloadValueAs("userId", Long.class);
+        var orderNumber = (Long) requestPaymentEvent.getPayloadValueAs("orderNumber", Long.class);
 
-        say( new PaymentResponseEvent(this, name(), requestPaymentEvent.from())
-                .setCustomerId(requestPaymentEvent.getCustomerId())
-                .setOrderNumber(requestPaymentEvent.getOrderNumber())
-                .setApprovalStatus(true)
+        log.info("asked to provide payment for: " + userId);
+
+        say( new ArchitectureFirstEvent(this, "PaymentResponseEvent", name(), requestPaymentEvent.from())
+                .setPayloadValue("userId", userId)
+                .setPayloadValue("orderNumber", orderNumber)
+                .setPayloadValue("approvalStatus", true)
                 .setOriginalEvent(requestPaymentEvent)
         );
     }
@@ -445,30 +459,24 @@ public class Customer extends BusinessActor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearSuggestedProducts = (event -> {
-        var evt = (SuggestedProductsEvent) event;
-
-        log.info(evt.getSuggestedProducts().size() + "suggested products have been received ");
-
         final Customer ths = (Customer) AopContext.currentProxy();
-        ths.viewSuggestedProducts(evt);
+        ths.viewSuggestedProducts(event);
 
         return ths;
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearPaymentRequest = (event -> {
-        var evt = (RequestPaymentEvent) event;
         final Customer ths = (Customer) AopContext.currentProxy();
 
-        ths.providePayment(evt);
+        ths.providePayment(event);
 
         return ths;
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearOrderConfirmation = (event -> {
-        var evt = (OrderConfirmationEvent) event;
         final Customer ths = (Customer) AopContext.currentProxy();
 
-        ths.viewOrderConfirmation(evt);
+        ths.viewOrderConfirmation(event);
 
         return ths;
     });

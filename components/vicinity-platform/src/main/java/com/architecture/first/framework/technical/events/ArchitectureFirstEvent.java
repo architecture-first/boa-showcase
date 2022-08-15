@@ -173,6 +173,10 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public boolean isNamed(String name) {return this.name.equals(name) || this.getClass().getSimpleName().equals(name);}
 
 
+    public ArchitectureFirstEvent setName(String name) {
+        this.name = name;
+        return this;
+    }
     public boolean isType(Type type) {
         return this.type.equals(type.getTypeName());
     }

@@ -6,12 +6,15 @@ import com.architecture.first.framework.business.actors.Actor;
 import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.vendor.VendorApplication;
 import com.architecture.first.framework.business.vicinity.queue.Queue;
+import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -35,8 +38,11 @@ public class Vendor extends BusinessActor {
     protected void on24hours() {
         var merchant = vicinity().findActor("Merchant");
         if (StringUtils.isNotEmpty(merchant)) { // send a "nice to have" event, but Merchants will look for data anyway
-            say(new SupplyProductsHaveArrivedEvent(this, name(), merchant)
-                    .addProduct(1001l, 10));
+            Map<Long,Integer> productsThatArrived =  new HashMap<>();
+            productsThatArrived.put(1001l, 10);
+
+            say(new ArchitectureFirstEvent(this, "SupplyProductsHaveArrivedEvent", name(), merchant)
+                    .setPayloadValue("productsThatArrived", productsThatArrived);
         }
 
         addAdditionalDeliveriesToQueue();

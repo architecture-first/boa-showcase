@@ -19,6 +19,7 @@ public class CustomerApplication {
     private static ConfigurableApplicationContext context;
 
     public static void main(String[] args) {
+        System.setProperty("spring.devtools.restart.enabled", "false");
         context = SpringApplication.run(CustomerApplication.class, args);
     }
 
@@ -54,6 +55,7 @@ public class CustomerApplication {
 
         Thread thread = new Thread(() -> {
             context.close();
+            System.setProperty("spring.devtools.restart.enabled", "false");
             context = SpringApplication.run(CustomerApplication.class, args.getSourceArgs());
         });
 

@@ -9,6 +9,7 @@ import com.architecture.first.framework.business.retail.model.cashier.model.inve
 import com.architecture.first.framework.business.retail.model.cashier.model.inventory.results.InventoryReorderAnalysisResult;
 import com.architecture.first.framework.business.retail.model.criteria.ShowProductsCriteria;
 import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
+import com.architecture.first.framework.business.retail.model.customer.cart.ShoppingCart;
 import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
 import com.architecture.first.framework.business.retail.storefront.Storefront;
@@ -22,6 +23,7 @@ import com.architecture.first.framework.technical.util.SimpleModel;
 import com.architecture.first.merchant.MerchantApplication;
 import com.architecture.first.merchant.repository.InventoryRepository;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -133,10 +136,28 @@ public class Merchant extends BusinessActor {
 
         return CartItem.from(product);
     }
+    
+    class ReorderLineItem {
+        private Long productId;
+        private Integer orderQuantity;
+
+        public ReorderLineItem(Long productId, Integer orderQuantity) {
+            this.productId = productId;
+            this.orderQuantity = orderQuantity;
+        }
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public Integer getOrderQuantity() {
+            return orderQuantity;
+        }
+    }
 
     // M04-Review Inventory
     @TaskTracking(task = "merchant/ReviewInventory")
-    public Boolean reviewInventory(ReviewInventoryEvent event) {
+    public Boolean reviewInventory(ArchitectureFirstEvent event) {
         List<InventoryReorderAnalysisResult> candidatesForReordering = findCandidatesForReordering(minimumAvailableProductThreshold);
         Merchant ths = (Merchant) AopContext.currentProxy();
 
@@ -144,12 +165,26 @@ public class Merchant extends BusinessActor {
             log.info("Reorder product " + result.getProductId());
             Long productId = result.getProductId();
             Integer orderQuantity = result.getOrderQuantity();
-
+            
+            var lineItem = new ReorderLineItem(productId, orderQuantity);
+            
             // TODO - Add additional logic to determine if something should be reordered
 
             // M05 - Order Supplies / Record Units on Order
-            var orderSupplyProductsEvent = new OrderSupplyProductsEvent(this, this.name(), this.name())
-                    .addProduct(productId, orderQuantity)
+            var orderSupplyProductsEvent = new ArchitectureFirstEvent(this, "OrderSupplyProductsEvent", this.name(), this.name())
+                    //.addProduct(productId, orderQuantity)
+                    .apply((afe, args) -> {
+                        ReorderLineItem mapArgs = (ReorderLineItem) args;
+                        int quantity = 0;
+                        var productsToOrder = (Map<Long,Integer>) afe.getPayloadListValueAs("productsToOrder", new TypeToken<Map<Long,Integer>>(){}.getType());
+                        if (productsToOrder.containsKey(productId)) {
+                            quantity = productsToOrder.get(productId) + quantity;
+                        }
+
+                        productsToOrder.put(productId, quantity);
+                        
+                        return afe;
+                    }, lineItem)
                     .setOriginalEvent(event);
             whisper(orderSupplyProductsEvent);
             ths.recordUnitsOnOrder(orderSupplyProductsEvent, productId, orderQuantity);
@@ -164,7 +199,7 @@ public class Merchant extends BusinessActor {
 
     // M03 - Reserve on Back Order
     @TaskTracking(task = "merchant/ReserveOnBackOrder", defaultParentTask = "merchant/ReserveItems")
-    public long reserveOnBackOrder(CheckoutRequestEvent event, Long productId, Integer unitsBackordered) {
+    public long reserveOnBackOrder(ArchitectureFirstEvent event, Long productId, Integer unitsBackordered) {
         return warehouse.reserveOnBackOrder(productId, unitsBackordered);
     }
 
@@ -176,7 +211,7 @@ public class Merchant extends BusinessActor {
 
     // M05 - Order Supplies / Record Deliveries
     @TaskTracking(task = "merchant/RecordDeliveries", defaultParentTask = "merchant/OrderSupplies")
-    protected long recordSupplyOrderHistory(SupplyProductsHaveArrivedEvent event, Long productId, Integer quantity) {
+    protected long recordSupplyOrderHistory(ArchitectureFirstEvent event, Long productId, Integer quantity) {
         return warehouse.recordSupplyOrderHistory(productId, quantity);
     }
 
@@ -184,16 +219,16 @@ public class Merchant extends BusinessActor {
     @TaskTracking(task = "merchant/SuggestProducts")
     protected void suggestProductsForCustomer(ArchitectureFirstEvent event) {
         var productId = (Long) event.getPayloadValueAs("productId", Long.class);
-        Long customerId = (event.hasAccessToken())
+        Long userId = (event.hasAccessToken())
                 ? SecurityGuard.getUserId(event.getAccessToken())
                 : 0;
-        String suggestedProductsKey = "SuggestedProductsFor_" + customerId + "_" + productId;
+        String suggestedProductsKey = "SuggestedProductsFor_" + userId + "_" + productId;
         Class<? extends ArrayList> clss = new ArrayList<InventorySuggestedProductsResult>().getClass();
 
         // Try to recall suggested products. If data is not there then get the products and then remember.
         var suggestedProducts = recall(suggestedProductsKey, clss).isPresent() ?
                 recall(suggestedProductsKey, clss).get()
-                : findSuggestedProductsForCustomer(event, customerId, productId);
+                : findSuggestedProductsForCustomer(event, userId, productId);
 
         if (exists(suggestedProducts)) {
             // Remember the suggested products for a while (also saves a backend call)
@@ -209,12 +244,12 @@ public class Merchant extends BusinessActor {
 
     // M07 - Remove Reservation
     @TaskTracking(task = "merchant/RecordDeliveries", defaultParentTask = "merchant/OrderSupplies")
-    protected long removeReservation(RemoveReservationsEvent event, Long productId, Integer unitsBackordered) {
+    protected long removeReservation(ArchitectureFirstEvent event, Long productId, Integer unitsBackordered) {
         return warehouse.removeReservation(productId, unitsBackordered);
     }
 
-    protected List<InventorySuggestedProductsResult> findSuggestedProductsForCustomer(ArchitectureFirstEvent event, Long customerId, Long productId) {
-        var suggestedProducts = warehouse.getSuggestedProducts(customerId, productId, numberOfOrdersToAnalyze, numberOfProductsToSuggest);
+    protected List<InventorySuggestedProductsResult> findSuggestedProductsForCustomer(ArchitectureFirstEvent event, Long userId, Long productId) {
+        var suggestedProducts = warehouse.getSuggestedProducts(userId, productId, numberOfOrdersToAnalyze, numberOfProductsToSuggest);
 
         return suggestedProducts.stream().map(s -> {
             var p = warehouse.getProductById(s.getProductId());
@@ -228,13 +263,13 @@ public class Merchant extends BusinessActor {
 
     // M09 - Give Bonus Points
     @TaskTracking(task = "merchant/GiveBonusPoints", defaultParentTask = "customer/CheckoutAsRegisteredCustomer")
-    protected long addBonusPointsToOrder(RequestBonusPointsEvent event, Long orderNumber, BigDecimal bonusPointsEarned) {
+    protected long addBonusPointsToOrder(ArchitectureFirstEvent event, Long orderNumber, BigDecimal bonusPointsEarned) {
         return warehouse.addBonusPointsToOrder(orderNumber, bonusPointsEarned);
     }
 
     // M02 - Reserve Items
     @TaskTracking(task = "merchant/ReserveItems", defaultParentTask = "customer/CheckoutAsRegisteredCustomer")
-    protected long reserveItems(CheckoutRequestEvent event, Long orderNumber, List<CartItem> items) {
+    protected long reserveItems(ArchitectureFirstEvent event, Long orderNumber, List<CartItem> items) {
          final Merchant ths = (Merchant) AopContext.currentProxy();
 
         items.forEach(item -> {
@@ -252,10 +287,10 @@ public class Merchant extends BusinessActor {
 
     // M09 - Give Bonus Points / Analysis
     @TaskTracking(task = "merchant/DetermineBonusPoints", defaultParentTask = "customer/CheckoutAsRegisteredCustomer")
-    protected List<BonusPointAnalysisResult> determineBonusPoints(RequestBonusPointsEvent bonusPointsEvent, BigDecimal totalPriceThreshold, BigDecimal totalPriceFactor) {
-        var results = warehouse.determineBonusPoints(bonusPointsEvent.getCustomerId(), totalPriceThreshold, totalPriceFactor);
+    protected List<BonusPointAnalysisResult> determineBonusPoints(ArchitectureFirstEvent bonusPointsEvent, BigDecimal totalPriceThreshold, BigDecimal totalPriceFactor) {
+        var results = warehouse.determineBonusPoints((Long) bonusPointsEvent.getPayloadValueAs("userId", Long.class), totalPriceThreshold, totalPriceFactor);
         results.forEach(r -> {
-            EarnedBonusPointsEvent event = new EarnedBonusPointsEvent(this, name(), TO_CUSTOMER);
+            var event = new ArchitectureFirstEvent(this, "EarnedBonusPointsEvent", name(), TO_CUSTOMER);
             event.payload().putAll(convertToMap(r));
         });
 
@@ -264,19 +299,18 @@ public class Merchant extends BusinessActor {
 
     // M03 - Reserve On Back Order
     @TaskTracking(task = "merchant/OrderSupplyProducts", defaultParentTask = "merchant/ReviewInventory")
-    protected boolean orderSupplyProducts(OrderSupplyProductsEvent event) {
+    protected boolean orderSupplyProducts(ArchitectureFirstEvent event) {
         //...
         return true;
     }
 
     public ArchitectureFirstEvent onExternalBehavior(ArchitectureFirstEvent event) {
-        if (event instanceof AcquireCrossSellProductsEvent) {
+        if (event.isNamed("AcquireCrossSellProductsEvent")) {
             var results =  behavior().perform(event);
             if (results.isPresent()) {
                 log.info("Cross Sells: " + results.get());
-                var evt = (AcquireCrossSellProductsEvent) event;
-                evt.addCrossSells("data", results.get());
-                return evt;
+                event.setPayloadValue("crossSells", results.get());
+                return event;
             }
         }
 
@@ -286,12 +320,11 @@ public class Merchant extends BusinessActor {
     @TaskTracking(task = "merchant/AcquireCrossSellProducts")
     public SimpleModel showCrossSells(DefaultLocalEvent localEvent) {
         var results = new SimpleModel();
-        this.whisper(new AcquireCrossSellProductsEvent(this, name(), name())
+        this.whisper(new ArchitectureFirstEvent(this, "AcquireCrossSellProductsEvent", name(), name())
                         .initFromDefaultEvent(localEvent),
                         r -> {
-                            if (r instanceof AcquireCrossSellProductsEvent) {
-                                var evt = (AcquireCrossSellProductsEvent) r;
-                                results.put("results", evt.getCrossSells());
+                            if (r.isNamed("AcquireCrossSellProductsEvent")) {
+                                results.put("results", r.getPayloadValueAs("crossSells", SimpleModel.class));
                                 return true;
                             }
                             return false;
@@ -317,11 +350,11 @@ public class Merchant extends BusinessActor {
 
     protected static Function<ArchitectureFirstEvent, Actor> hearSupplyProductsHaveArrived = (event -> {
         final Merchant ths = (Merchant) AopContext.currentProxy();
-        SupplyProductsHaveArrivedEvent evt = (SupplyProductsHaveArrivedEvent) event;
-        evt.getProductsThatArrived().forEach((productId, quantity) -> {
-            evt.getTarget().ifPresentOrElse(
-                    (m) -> ths.recordSupplyOrderHistory(evt, productId, quantity),
-                    () -> {throw new ActorException(evt.getTarget().get(), "id: " + productId + " not found");}
+        var productsThatArrived = (Map<Long,Integer>) event.getPayloadValueAs("productsThatArrived", new TypeToken<Map<Long,Integer>>(){}.getType());
+        productsThatArrived.forEach((productId, quantity) -> {
+            event.getTarget().ifPresentOrElse(
+                    (m) -> ths.recordSupplyOrderHistory(event, productId, quantity),
+                    () -> {throw new ActorException(event.getTarget().get(), "id: " + productId + " not found");}
             );
         });
 
@@ -334,11 +367,10 @@ public class Merchant extends BusinessActor {
 
     protected static Function<ArchitectureFirstEvent, Actor> hearRemoveReservationRequest = (event -> {
         final Merchant ths = (Merchant) AopContext.currentProxy();
-        RemoveReservationsEvent evt = (RemoveReservationsEvent) event;
-
-        evt.getProductReservationsToRemove().forEach((productId, quantity) -> {
-            evt.getTarget().ifPresentOrElse(
-                    (m) -> ths.removeReservation(evt, productId, quantity),
+        var productReservationsToRemove = (Map<Long,Integer>) event.getPayloadValueAs("productsThatArrived", new TypeToken<Map<Long,Integer>>(){}.getType());
+        productReservationsToRemove.forEach((productId, quantity) -> {
+            event.getTarget().ifPresentOrElse(
+                    (m) -> ths.removeReservation(event, productId, quantity),
                     () -> {throw new ActorException(ths, "id: " + productId + " not found");}
             );
         });
@@ -347,25 +379,23 @@ public class Merchant extends BusinessActor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearBonusPointsRequest = (event -> {
-        RequestBonusPointsEvent evt = (RequestBonusPointsEvent) event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        var list = ths.determineBonusPoints(evt,
+        var list = ths.determineBonusPoints(event,
                 ths.totalPriceThreshold, ths.totalPriceFactor);
         list.forEach(r -> {
-            ths.addBonusPointsToOrder(evt, r.getOrderNumber(), r.getBonusPoints());
-            ths.say(new EarnedBonusPointsEvent(ths, ths.name(), TO_CUSTOMER)
-                    .setCustomerId(r.getCustomerId()).setOrderNumber(r.getOrderNumber()));
+            ths.addBonusPointsToOrder(event, r.getOrderNumber(), r.getBonusPoints());
+            ths.say(new ArchitectureFirstEvent(ths, "EarnedBonusPointsEvent", ths.name(), TO_CUSTOMER)
+                    .setPayloadValue("userId", r.getCustomerId()).setPayloadValue("orderNumber", (r.getOrderNumber())));
         });
 
         return ths;
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearOrderSuppliesRequest = (event -> {
-        var evt = (OrderSupplyProductsEvent) event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        ths.orderSupplyProducts(evt);
+        ths.orderSupplyProducts(event);
 
         return ths;
     });
@@ -391,20 +421,20 @@ public class Merchant extends BusinessActor {
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearCheckoutRequest = (event -> {
-        var evt = (CheckoutRequestEvent) event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        var requestPaymentEvent = ths.reserveItems(evt, evt.getOrderNumber(), evt.getShoppingCart().getItems());
+        var requestPaymentEvent = ths.reserveItems(event,
+                (Long) event.getPayloadValueAs("orderNumber", Long.class),
+                ((ShoppingCart) event.getPayloadValueAs("shoppingCart", ShoppingCart.class)).getItems());
 
         return ths;
     });
 
     protected static Function<ArchitectureFirstEvent, Actor> hearCrossSellsUpdated = (event -> {
-        var evt = (CrossSellsUpdatedEvent) event;
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        evt.reply(ths.name());
-        ths.say(evt);
+        event.reply(ths.name());
+        ths.say(event);
 
         return ths;
     });
@@ -433,7 +463,7 @@ public class Merchant extends BusinessActor {
                         .equals(Lock.FAILED_LOCK_ATTEMPT)) {
 
                     Merchant ths = (Merchant) AopContext.currentProxy();
-                    ths.reviewInventory(new ReviewInventoryEvent(this, name(), name()));
+                    ths.reviewInventory(new ArchitectureFirstEvent(this, "ReviewInventoryEvent", name(), name()));
                 }
             } finally {
                 lock().unlock("ReviewInventory", name());
@@ -445,7 +475,7 @@ public class Merchant extends BusinessActor {
     protected void on24hours() {
 /*        var advertiser = vicinity().findActor("Advertiser");
         if (StringUtils.isNotEmpty(advertiser)) {
-            say(new AcquireCrossSellProductsEvent(this, name(), advertiser));
+            say(new ArchitectureFirstEvent(this, "AcquireCrossSellProductsEvent", name(), advertiser));
         }
         else {
             log.warn("Advertiser not found");

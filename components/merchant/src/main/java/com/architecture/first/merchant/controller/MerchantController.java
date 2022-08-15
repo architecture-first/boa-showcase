@@ -4,6 +4,7 @@ import com.architecture.first.framework.business.retail.events.AcquireCrossSellP
 import com.architecture.first.framework.business.retail.events.ViewProductEvent;
 import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
+import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;
 import com.architecture.first.framework.technical.events.DefaultLocalEvent;
 import com.architecture.first.merchant.actors.Merchant;
 import com.architecture.first.framework.business.retail.model.cashier.model.inventory.Product;
@@ -34,8 +35,8 @@ public class MerchantController {
 
     @GetMapping("{productId}")
     public CartItem getProduct(@PathVariable("productId") Long id) {
-        return merchant.showProduct(new ViewProductEvent(this, "MerchantController", "Merchant")
-                .setProductId(id));
+        return merchant.showProduct(new ArchitectureFirstEvent(this, "ViewProductEvent", "MerchantController", "Merchant")
+                .setPayloadValue("productId", id));
     }
 
     @GetMapping("/crosssell")
