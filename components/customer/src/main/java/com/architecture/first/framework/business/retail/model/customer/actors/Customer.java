@@ -100,17 +100,14 @@ public class Customer extends BusinessActor {
     public CartItem viewProduct(ArchitectureFirstEvent localEvent, Long id) {
         SimpleModel returnData = new SimpleModel();
 
-        var event = new ViewProductEvent(this, name(), "Merchant")
-                .setProductId(id)
-                .setRequestId(localEvent.getRequestId())
-                .setAccessToken(localEvent.getAccessToken())
+        var event = new ArchitectureFirstEvent(this, "ViewProductEvent", name(), "Merchant")
+                .setPayloadValue("productId", id)
                 .shouldAwaitResponse(true)
                 .initFromDefaultEvent(localEvent);
 
         say(event, response -> {
-            if (response instanceof ViewProductEvent) {
-                var evt = (ViewProductEvent) response;
-                returnData.put("product", evt.getProduct());
+            if (response.isNamed("ViewProductEvent")) {
+                returnData.put("product", response.getPayloadValueAs("product", CartItem.class));
                 log.info("the product has arrived");
                 return true;
             }
@@ -417,7 +414,7 @@ public class Customer extends BusinessActor {
         event.setTo(ClientCommunication.CLIENT);
         client.say(event);
 
-        return CartItem.from((Product) event.getPayloadValueAs("product", Product.class));
+        return (CartItem) event.getPayloadValueAs("product", CartItem.class);
     }
 
     private SystemInfo validateChange(SystemInfo systemInfo, long numUpdates,

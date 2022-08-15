@@ -5,15 +5,15 @@ import com.architecture.first.framework.business.vicinity.events.ErrorEvent;
 import com.architecture.first.framework.business.vicinity.messages.VicinityMessage;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.technical.util.SimpleModel;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.arch.Processor;
 import org.springframework.context.ApplicationEvent;
 
 import java.lang.reflect.Type;
@@ -712,10 +712,12 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
 
     private void initGson() {
         gson = new Gson();
+        ObjectMapper om = new ObjectMapper();
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         gsonConfig = Configuration
                 .builder()
-                .mappingProvider(new JacksonMappingProvider())
-                .jsonProvider(new JacksonJsonProvider())
+                .mappingProvider(new JacksonMappingProvider(om))
+                .jsonProvider(new JacksonJsonProvider(om))
                 .build();
     }
 
@@ -751,7 +753,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @param value
      * @return
      */
-    public ArchitectureFirstEvent addHeaderValue(String name, Object value) {
+    public ArchitectureFirstEvent setHeaderValue(String name, Object value) {
         header().put(name, value);
         return this;
     }
@@ -781,7 +783,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @param value
      * @return
      */
-    public ArchitectureFirstEvent addPayloadValue(String name, Object value) {
+    public ArchitectureFirstEvent setPayloadValue(String name, Object value) {
         payload().put(name, value);
         return this;
     }

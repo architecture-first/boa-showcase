@@ -8,6 +8,6 @@ vicinity:
   processType: server
   name: local-vicinity
   env:
-    to-do: disable
-    acknowledgement: disable
-    actor-entered-event: disable
+    to-do: disabled
+    acknowledgement: disabled
+    actor-entered-event: disabled

@@ -13,7 +13,6 @@ import com.architecture.first.framework.business.retail.model.merchant.Delivery;
 import com.architecture.first.framework.business.retail.model.results.InventorySuggestedProductsResult;
 import com.architecture.first.framework.business.retail.storefront.Storefront;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
-import com.architecture.first.framework.business.vicinity.events.ActorNotFoundEvent;
 import com.architecture.first.framework.business.vicinity.locking.Lock;
 import com.architecture.first.framework.business.vicinity.tasklist.TaskTracking;
 import com.architecture.first.framework.security.SecurityGuard;
@@ -384,7 +383,7 @@ public class Merchant extends BusinessActor {
     protected static Function<ArchitectureFirstEvent, Actor> hearViewProductRequest = (event -> {
         final Merchant ths = (Merchant) AopContext.currentProxy();
 
-        event.addPayloadValue("suggestedProducts", ths.showProduct(event));
+        event.setPayloadValue("product", ths.showProduct(event));
         event.reply(ths.name());
         ths.say(event);
 

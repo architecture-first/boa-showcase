@@ -117,7 +117,8 @@ public class VicinityProxy implements Vicinity {
     @PostConstruct
     protected void init() {
         if (!vicinityProcessType.equals("server")) {
-            vicinityInfo = getInfo("api/vicinity/info");
+            var info = getInfo("api/vicinity/info");
+            vicinityInfo.from(info);
         }
     }
 

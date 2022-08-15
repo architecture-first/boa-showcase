@@ -8,6 +8,7 @@ import com.architecture.first.framework.business.actors.external.behavior.Logic;
 import com.architecture.first.framework.business.actors.external.behavior.script.model.PipelineEntry;
 import com.architecture.first.framework.business.vicinity.Vicinity;
 import com.architecture.first.framework.business.vicinity.acknowledgement.Acknowledgement;
+import com.architecture.first.framework.business.vicinity.info.VicinityInfo;
 import com.architecture.first.framework.security.events.SecurityHolderEvent;
 import com.architecture.first.framework.technical.bulletinboard.BulletinBoard;
 import com.architecture.first.framework.technical.bulletinboard.BulletinBoardStatus;
@@ -82,6 +83,9 @@ public class Actor {
 
     @Autowired
     private Vicinity vicinity;
+
+    @Autowired
+    private VicinityInfo vicinityInfo;
 
     @Autowired
     private Memory memory;
@@ -1176,11 +1180,13 @@ public class Actor {
             log.warn(String.format("Actor %s is attempting to override actors in group %s", name(), group()));
         }
 
-        announce(new ActorEnteredEvent(this, name(), group())
-                .setAccessToken(OVERRIDE_ACCESS_TOKEN)
-                .setJoinToken(JOIN_TOKEN)
-                .setOverrideToken(OVERRIDE_TOKEN)
-        );
+        if (vicinityInfo.getActorEnteredEvent().equals(VicinityInfo.VALUE_ENABLED)) {
+            announce(new ActorEnteredEvent(this, name(), group())
+                    .setAccessToken(OVERRIDE_ACCESS_TOKEN)
+                    .setJoinToken(JOIN_TOKEN)
+                    .setOverrideToken(OVERRIDE_TOKEN)
+            );
+        }
     }
 
     /**

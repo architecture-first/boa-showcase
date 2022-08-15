@@ -13,16 +13,29 @@ public class VicinityInfo {
     public static String VALUE_ENABLED = "enabled";
     public static String VALUE_DISABLED = "disabled";
 
-    @Value("${vicinity.name}")
+    public VicinityInfo() {}
+
+    public VicinityInfo(VicinityInfo info) {
+        from(info);
+    }
+
+    public void from(VicinityInfo info) {
+        this.name = info.name;
+        this.todo = info.todo;
+        this.acknowledgement = info.acknowledgement;
+        this.actorEnteredEvent = info.actorEnteredEvent;
+    }
+
+    @Value("${vicinity.name:local-vicinity}")
     private String name;
 
-    @Value("${vicinity.to-do:enabled}")
+    @Value("${vicinity.env.to-do:enabled}")
     private String todo;
 
-    @Value("${vicinity.acknowledgement:enabled}")
+    @Value("${vicinity.env.acknowledgement:enabled}")
     private String acknowledgement;
 
-    @Value("${vicinity.actor-entered-event:enabled}")
+    @Value("${vicinity.env.actor-entered-event:enabled}")
     private String actorEnteredEvent;
 
 }
