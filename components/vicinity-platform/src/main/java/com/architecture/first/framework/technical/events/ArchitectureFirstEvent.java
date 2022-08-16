@@ -38,8 +38,11 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public static final String BOA_PROJECT = "boa-project";
     public static String EVENT_ALL_PARTICIPANTS = "all";
 
+    public static String EVENT_TYPE_ANONYMOUS_OK = "AnonymousOkEvent";
+    public static String EVENT_TYPE_SECURED_BASIC = "SecuredBasic";
+
     private String name = "ArchitectureFirstEvent";
-    private String type = "AnonymousOkEvent";
+    private String type = EVENT_TYPE_ANONYMOUS_OK;
     private SimpleModel header = new SimpleModel();
     private SimpleModel payload = new SimpleModel();
     private String message = "";
@@ -167,12 +170,44 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
     public String type() {return type;}
 
     /**
+     * Sets the type of the event
+     * @param type
+     * @return
+     */
+    public ArchitectureFirstEvent setType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    /**
+     * Sets the event as secured
+     * @return
+     */
+    public ArchitectureFirstEvent setAsSecured() {
+        this.type = EVENT_TYPE_SECURED_BASIC;
+        return this;
+    }
+
+    /**
+     * Returns whether the event is secured
+     * @return
+     */
+    public boolean isSecured() {
+        return this.type.equals(EVENT_TYPE_SECURED_BASIC);
+    }
+
+    /**
      * Returns whether the event is a certain name
      * @return
      */
     public boolean isNamed(String name) {return this.name.equals(name) || this.getClass().getSimpleName().equals(name);}
 
 
+    /**
+     * Sets the name of the event
+     * @param name
+     * @return
+     */
     public ArchitectureFirstEvent setName(String name) {
         this.name = name;
         return this;
@@ -920,7 +955,7 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @return return ArchitectureFirstEvent object or null if error
      */
     public static ArchitectureFirstEvent fromForReplyWithoutPayload(Object source, String from, ArchitectureFirstEvent originalEvent) {
-        ArchitectureFirstEvent replyEvent = new ArchitectureFirstEvent(source, originalEvent.type(), from, originalEvent.from());
+        ArchitectureFirstEvent replyEvent = new ArchitectureFirstEvent(source, originalEvent.name(), from, originalEvent.from());
         replyEvent.setOriginalEvent(originalEvent);
 
         return replyEvent;
@@ -934,9 +969,32 @@ public class ArchitectureFirstEvent extends ApplicationEvent {
      * @return return ArchitectureFirstEvent object or null if error
      */
     public static ArchitectureFirstEvent fromForReply(Object source, String from, ArchitectureFirstEvent originalEvent) {
+        return fromForReply(source, originalEvent.name(), originalEvent.type(), from, originalEvent, true);
+    }
+
+
+    /**
+     * Returns an event based on an original event
+     * @param from
+     * @param name
+     * @param type
+     * @param source
+     * @param originalEvent
+     * @return return ArchitectureFirstEvent object or null if error
+     */
+    public static ArchitectureFirstEvent fromForReply(Object source, String name, String type, String from, ArchitectureFirstEvent originalEvent, boolean includePayload) {
         ArchitectureFirstEvent replyEvent = fromForReplyWithoutPayload(source, from, originalEvent);
-        replyEvent.addPayload(originalEvent.payload());
+
+        if (includePayload) {
+            replyEvent.addPayload(originalEvent.payload());
+        }
         replyEvent.setAccessToken(originalEvent.getAccessToken());
+        replyEvent.setName(name);
+        replyEvent.setType(type);
+
+        if (originalEvent.isSecured()) {
+            replyEvent.setAsSecured();
+        }
 
         return replyEvent;
     }

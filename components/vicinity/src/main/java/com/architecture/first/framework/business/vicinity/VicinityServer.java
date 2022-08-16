@@ -143,7 +143,9 @@ public class VicinityServer implements Vicinity {
                         onVicinitySecurityGuardRejectedEvent(event);
                     }
                 }
-                onVicinityReceivedEventBlocked(event);
+                else {
+                    onVicinityReceivedEventBlocked(event);
+                }
             }
             else {
                 onVicinityAlreadyPropagatedEvent(event);

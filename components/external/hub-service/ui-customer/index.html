@@ -493,6 +493,9 @@
                     else {
                         boa.checkout.performCheckout();
                         boa.product.productDialog.close();
+                        if (boa.suggested.suggestedProductsDialog.open) {
+                            boa.suggested.suggestedProductsDialog.close();
+                        }
                     }
                 });
 

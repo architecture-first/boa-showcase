@@ -142,7 +142,6 @@ public class CustomerRepository {
 
         shoppingCart.setOrderNumber(orderNumber);
         shoppingCart.setIsActive(true);
-        shoppingCart.setUpdateDate(new Date());
         shoppingCart.setUpdatedBy(shoppingCart.getEmailAddress());
 
         collection.insertOne(shoppingCart);
@@ -172,7 +171,7 @@ public class CustomerRepository {
                                  "originalPrice": NumberDecimal(":originalPrice"),
                                  "calculatedPrice": NumberDecimal(":calculatedPrice"),
                                  "discounts": [],
-                                 updatedBy: "system", updateDate: ISODate()
+                                 "updatedBy": "system", updateDate: ISODate()
                              }
                     }
                 }
@@ -208,7 +207,7 @@ public class CustomerRepository {
         customerSignUp.setUserId(customerNumber);
         customerSignUp.setIsRegistered(true);
         customerSignUp.setIsActive(true);
-        customerSignUp.setUpdateDate(new Date());
+//        customerSignUp.setUpdateDate(new Date());
         customerSignUp.setUpdatedBy(customerSignUp.getEmailAddress());
 
         collection.insertOne(customerSignUp);

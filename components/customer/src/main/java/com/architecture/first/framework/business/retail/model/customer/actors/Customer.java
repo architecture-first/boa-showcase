@@ -294,6 +294,7 @@ public class Customer extends BusinessActor {
                 .setPayloadValue("userId", cart.getUserId())
                 .setPayloadValue("orderNumber", cart.getOrderNumber())
                 .setPayloadValue("shoppingCart", cart)
+                .setAsSecured()
                 .shouldAwaitResponse(true)
                 .setAwaitTimeoutSeconds(60)
                 .initFromDefaultEvent(localEvent);
@@ -390,11 +391,10 @@ public class Customer extends BusinessActor {
         log.info("order confirmation arrived for: " + event.getPayloadValueAs("userId", Long.class));
         var orderConfirmation = (OrderConfirmation) event.getPayloadValueAs("orderConfirmation", OrderConfirmation.class);
 
-        client.say(event);
-
         event.header().put("path","hub/customer/order-confirmation");
         event.setTo(ClientCommunication.CLIENT);
         event.payload().put("orderConfirmation", orderConfirmation);
+        client.say(event);
 
         return orderConfirmation;
     }
@@ -411,6 +411,7 @@ public class Customer extends BusinessActor {
                 .setPayloadValue("userId", userId)
                 .setPayloadValue("orderNumber", orderNumber)
                 .setPayloadValue("approvalStatus", true)
+                .setAsSecured()
                 .setOriginalEvent(requestPaymentEvent)
         );
     }

@@ -9,7 +9,7 @@ public class SystemInfo {
     private boolean hasErrors;
     private String errorCode = "";
     private String message = "";
-    private Date updateDate;
+//    private Date updateDate;
     private String updatedBy;
 
     public String getErrorCode() {
@@ -36,13 +36,13 @@ public class SystemInfo {
         this.hasErrors = status;
     }
 
-    public Date getUpdateDate() {
+/*    public Date getUpdateDate() {
         return updateDate;
-    }
+    }*/
 
-    public void setUpdateDate(Date updateDate) {
+/*    public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
-    }
+    }*/
 
     public String getUpdatedBy() {
         return updatedBy;

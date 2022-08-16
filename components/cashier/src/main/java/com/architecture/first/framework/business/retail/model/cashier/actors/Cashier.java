@@ -62,7 +62,8 @@ public class Cashier extends BusinessActor {
         Cashier ths = (Cashier) AopContext.currentProxy();
 
         var event = new ArchitectureFirstEvent(this, "RequestPaymentEvent", name(), checkoutRequestEvent.from())
-                .setPayloadValue("userId", "userId")
+                .setPayloadValue("userId", userId)
+                .setPayloadValue("orderNumber", order.getOrderNumber())
                 .setPayloadValue("orderPreview", order)
                 .setOriginalEvent(checkoutRequestEvent);
 
@@ -135,7 +136,8 @@ public class Cashier extends BusinessActor {
         var userId = (Long) paymentEvent.getPayloadValueAs("userId", Long.class);
         var orderNumber = (Long) paymentEvent.getPayloadValueAs("orderNumber", Long.class);
 
-        var replyEvent = ArchitectureFirstEvent.fromForReply(this,  name(), paymentEvent);
+        var replyEvent = ArchitectureFirstEvent.fromForReply(this, "OrderConfirmationEvent", ArchitectureFirstEvent.EVENT_TYPE_SECURED_BASIC,
+                name(), paymentEvent, true);
         replyEvent.setPayloadValue("userId",userId);
 
         var orderConfirmation = checkout.getOrderConfirmation(userId, orderNumber);
