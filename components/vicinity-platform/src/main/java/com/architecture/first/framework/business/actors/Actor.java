@@ -1410,7 +1410,7 @@ public class Actor {
                             || t.equalsIgnoreCase(actor.getClass().getSimpleName()) // message is targeted to any actor in group
                             || t.equalsIgnoreCase(ArchitectureFirstEvent.EVENT_ALL_PARTICIPANTS)) { // event is targeted to any actor
                         if (!event.isAnnouncement() || (event.isAnnouncement() && !event.from().equals(actor.name()))) {
-                            log.info("Receiving event: " + new Gson().toJson(event));
+                            log.info(actor.group() + " received event: " + new Gson().toJson(event));
                             actor.hear(event);
                         }
                     }

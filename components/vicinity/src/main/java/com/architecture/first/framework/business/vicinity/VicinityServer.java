@@ -322,7 +322,7 @@ public class VicinityServer implements Vicinity {
     }
 
     private boolean onVicinityReceiveEvent(ArchitectureFirstEvent event) {
-        log.info("Receiving event: " + event);
+        log.info("Vicinity Server Receiving event: " + event);
 
         if (event.name().equals("ActorEnteredEvent")) {
             if (vicinityInfo.getActorEnteredEvent().equals(VicinityInfo.VALUE_DISABLED)) {

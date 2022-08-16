@@ -59,9 +59,6 @@ public class VicinityProxy implements Vicinity {
     public static String METHOD_POST = "POST";
     private static String VICINITY_API_MESSAGE_SEND = "api/vicinity/message/send";
 
-    private final Map<String, BiFunction<Actor, ArchitectureFirstEvent, Void>> callbacksByActor = new HashMap<>();
-    private final Map<String, Actor> subscriberActors = new HashMap<>();
-
     @Autowired
     private ApplicationEventPublisher publisher;
 
@@ -140,7 +137,7 @@ public class VicinityProxy implements Vicinity {
 
         if (!event.isLocal() && !(event instanceof LocalEvent)) { // local events don't leave this process
             if (!event.isPropagatedFromVicinity()) { // don't echo back out events
-                log.info("Receiving event: " + event.toString());
+                log.info("Vicinity Proxy evaluating event: " + event.toString());
 
                 if (SecurityGuard.isOkToProceed(event)) {
                     try {
@@ -206,9 +203,6 @@ public class VicinityProxy implements Vicinity {
      * @param target
      */
     public void subscribe(Actor owner, String target, BiFunction<Actor, ArchitectureFirstEvent, Void> fnCallback) {
-        callbacksByActor.put(target, fnCallback);
-        subscriberActors.put(target, owner);
-
         Runnable submitTask =  () -> {
             try (Jedis jedisDedicated = new Jedis(redisHost, redisPort, JEDIS_TIMEOUT)) {
                 jedisDedicated.subscribe(new JedisPubSub() {
@@ -236,11 +230,6 @@ public class VicinityProxy implements Vicinity {
                                             if ("server".equals(vicinityProcessType)) {
                                                 event.setPropagatedFromVicinity(false);
                                             }
-/*                                            if (callbacksByActor.containsKey(event.toFirst())) {
-                                                var fnHandleMessage = callbacksByActor.get(event.toFirst());
-                                                var actor = subscriberActors.get(event.toFirst());
-                                                fnHandleMessage.apply(actor, event);
-                                            }*/
                                             if (owner.isSecurityGuard()) {
                                                 publisher.publishEvent(new SecurityHolderEvent(event));
                                             }
@@ -295,12 +284,6 @@ public class VicinityProxy implements Vicinity {
     public void unsubscribe(String target) {
         if (taskGroups.containsKey(target)) {
             taskGroups.get(target).shutdown();
-        }
-        if (callbacksByActor.containsKey(target)) {
-            callbacksByActor.remove(target);
-        }
-        if (subscriberActors.containsKey(target)) {
-            subscriberActors.remove(target);
         }
     }
 
