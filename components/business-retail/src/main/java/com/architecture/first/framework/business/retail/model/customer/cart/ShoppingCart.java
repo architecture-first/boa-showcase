@@ -20,7 +20,7 @@ public class ShoppingCart {
     private Boolean isActive;
     private List<CartItem> items = new ArrayList<>();
     private String status = "cart";
-    private Date updateDate;
+//    private Date updateDate;
     private String updatedBy;
 
     public ShoppingCart init(CustomerRegistration registration) {

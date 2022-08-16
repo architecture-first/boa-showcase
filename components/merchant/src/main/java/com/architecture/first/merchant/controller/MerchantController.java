@@ -1,7 +1,5 @@
 package com.architecture.first.merchant.controller;
 
-import com.architecture.first.framework.business.retail.events.AcquireCrossSellProductsEvent;
-import com.architecture.first.framework.business.retail.events.ViewProductEvent;
 import com.architecture.first.framework.business.retail.model.customer.cart.CartItem;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
 import com.architecture.first.framework.technical.events.ArchitectureFirstEvent;

@@ -2,7 +2,6 @@ package com.architecture.first.merchant.actors;
 
 import com.architecture.first.framework.business.retail.events.*;
 import com.architecture.first.framework.business.retail.storefront.model.IProduct;
-import com.architecture.first.framework.business.vicinity.VicinityServer;
 import com.architecture.first.framework.security.SecurityGuard;
 import com.architecture.first.framework.security.events.UserTokenReplyEvent;
 import com.architecture.first.framework.security.events.UserTokenRequestEvent;
@@ -39,9 +38,6 @@ class MerchantTests {
     MerchantForTesting merchant;
 
     @Autowired
-    VicinityServer vicinityServer;
-
-    @Autowired
     private ApplicationEventPublisher publisher;
 
     @BeforeEach
@@ -68,42 +64,8 @@ class MerchantTests {
 
     @Test
     void reviewInventory() {
-        Boolean hasChecked = merchant.reviewInventory(new ReviewInventoryEvent(this, "tester", "Merchant"));
+        Boolean hasChecked = merchant.reviewInventory(new ArchitectureFirstEvent(this, "ReviewInventoryEvent", "tester", "Merchant"));
         Assert.isTrue(hasChecked, "Inventory is not checked");
-    }
-
-    @Test
-    void hearProductsHaveArrived() {
-        SupplyProductsHaveArrivedEvent event = new SupplyProductsHaveArrivedEvent("Source", "tester", "Merchant");
-        event.addProduct(1003l, 1);
-        publisher.publishEvent(event);
-        Assert.isTrue(true, "Inventory is not checked");
-    }
-
-    @Test
-    void sayProductsHaveArrivedViaVicinity() {
-        SupplyProductsHaveArrivedEvent event = new SupplyProductsHaveArrivedEvent("Source", "tester", "Customer");
-        event.addProduct(1003l, 1);
-        publisher.publishEvent(event);
-        Assert.isTrue(true, "Inventory is not checked");
-    }
-
-    @Test
-    void hearRemoveReservationsRequest() {
-        RemoveReservationsEvent event = new RemoveReservationsEvent(merchant, "tester", merchant.name());
-        event.setAccessToken("eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJSZXRhaWxBcHAiLCJzdWIiOiJhY2Nlc3MiLCJjdXN0b21lcklkIjoiQzAwMSIsIm5hbWUiOiJCb2IiLCJzY29wZSI6ImN1c3RvbWVyIiwiaWF0IjoxNjUwNzQzOTYzLCJleHAiOjE2NTEzNDg3NjN9.rCRW26tlmMnb79thhQG5kI1uW68G36HVH0ap-JfW4Auaa_vtk2VW7j_IgHgtoGaSw3LCqsk1IeNIbu0zcGmyQA");
-        event.addProductReservation(1003l, 1);
-        publisher.publishEvent(event);
-        Assert.isTrue(true, "Inventory is not checked");
-    }
-
-    @Test
-    void hearBonusPointsRequest() {
-        RequestBonusPointsEvent event = new RequestBonusPointsEvent("Source", "tester", "merchant");
-        event.setCustomerId(1001l);
-        event.setOrderNumber(100001l);
-        publisher.publishEvent(event);
-        Assert.isTrue(true, "Inventory is not checked");
     }
 
     @Test
@@ -143,10 +105,10 @@ class MerchantTests {
 
     @Test
     void reply() {
-        RequestBonusPointsEvent event = new RequestBonusPointsEvent("Source", "Customer", "Merchant");
-        event.setAccessToken("eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJSZXRhaWxBcHAiLCJzdWIiOiJhY2Nlc3MiLCJjdXN0b21lcklkIjoiQzAwMSIsIm5hbWUiOiJCb2IiLCJzY29wZSI6ImN1c3RvbWVyIiwiaWF0IjoxNjUwNzQzOTYzLCJleHAiOjE2NTEzNDg3NjN9.rCRW26tlmMnb79thhQG5kI1uW68G36HVH0ap-JfW4Auaa_vtk2VW7j_IgHgtoGaSw3LCqsk1IeNIbu0zcGmyQA");
-        event.setCustomerId(1001l);
-        event.setOrderNumber(100001l);
+        var event = new ArchitectureFirstEvent ("Source", "RequestBonusPointsEvent", "Customer", "Merchant");
+        event.setHeaderValue("jwtToken", "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJSZXRhaWxBcHAiLCJzdWIiOiJhY2Nlc3MiLCJjdXN0b21lcklkIjoiQzAwMSIsIm5hbWUiOiJCb2IiLCJzY29wZSI6ImN1c3RvbWVyIiwiaWF0IjoxNjUwNzQzOTYzLCJleHAiOjE2NTEzNDg3NjN9.rCRW26tlmMnb79thhQG5kI1uW68G36HVH0ap-JfW4Auaa_vtk2VW7j_IgHgtoGaSw3LCqsk1IeNIbu0zcGmyQA");
+        event.setPayloadValue("userId", 1001l);
+        event.setPayloadValue("orderNumber", 100001l);
 
         merchant.reply(event, fnTestReplyBehavior);
         Assert.isTrue(true, "");

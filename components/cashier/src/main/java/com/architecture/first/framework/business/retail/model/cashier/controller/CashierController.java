@@ -1,6 +1,5 @@
 package com.architecture.first.framework.business.retail.model.cashier.controller;
 
-import com.architecture.first.framework.business.retail.events.CheckoutRequestEvent;
 import com.architecture.first.framework.business.retail.model.cashier.actors.Cashier;
 import com.architecture.first.framework.business.retail.model.cashier.model.order.cart.Order;
 import com.architecture.first.framework.security.SecurityGuard;
