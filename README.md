@@ -30,16 +30,6 @@ As shown above, the platform is a layer on top of existing Cloud and On-Prem sol
 It is recommended to read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
-## Retail Showcase application
-
-A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
-
-**Note**: Follow the <a href="#using-the-retail-showcase-application">Using the retail showcase application</a> instructions below."
-
-## Javadoc reference
-
-The developer API reference can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:8080/).
-
 ## Installation
 The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
 
