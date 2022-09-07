@@ -34,16 +34,6 @@ For instance a Library, can be stored in an AWS S3 Bucket or a mounted file syst
 It is recommended to read some of the documentation before installing.
 An overview of BOA can be found [here](docs/programming/Overview.md).
 
-## Demo version
-
-A demo can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:10010/).
-
-**Note**: Follow the <a href="#using-the-showcase-retail-application">Using the showcase retail application</a> instructions below."
-
-## Javadoc reference
-
-The developer API reference can be found [here](http://ec2-52-91-88-169.compute-1.amazonaws.com:8080/).
-
 ## Installation
 The installation instructions are based on Linux whether as the core operating system or a structure such as Windows WSL 2.
 
