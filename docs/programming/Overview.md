@@ -11,26 +11,6 @@ The latest of the major industry changes is the move to the Cloud.
 The Cloud has removed many of the barriers of the 'on prem' environments and opened up new opportunities.
 Some of those opportunities include distributed computing, machine learning, high availability and the ability to create smarter programs.
 
-## Classic Programming
-With all the computing power, our thinking in the past has been limited.
-Often, the automation has been limited to creating word processors, forms and grids.
-
-![](images/boa-general-documentation-Form.drawio.png)
-
-As shown above, the main vehicle for the entry of information is a form.
-The data is retrieved and saved using standard CRUD processing.
-
-![](images/boa-general-documentation-Grid.drawio.png)
-
-The standard way to represent a set of information is a grid.
-This is partly because many applications are created from an Excel application that no longer meets the user demands.
-
-![](images/boa-general-documentation-Magazine.drawio.png)
-
-Websites are great, but they are mainly glorified magazines.
-They have main pages, navigation bars, etc.
-They are built to provide data and the ability for the user to navigate, but are rarely proactive.
-
 ## New Opportunities
 
 The new opportunities allow an application to interact with a user instead of just obeying commands.
@@ -48,8 +28,8 @@ We want to do more than produce a grid that a user uses to export data to Excel 
 We want to do the processing that the user exported the data for if possible.
 The goal is to make the user's job easier and not to simply move data around.
 
-The showcase retail application demonstrates some techniques for coding to the desired value-add goals.
-The application uses the Business Oriented Architecture (BOA) approach of the A[rchitecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy.
+The retail showcase application demonstrates some techniques for coding to the desired value-add goals.
+The application uses the Business Oriented Architecture (BOA) approach of the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy.
 
 These goals include:
 - Writing smarter programs
@@ -74,7 +54,7 @@ These goals include:
 ## Philosophy
 
 The service in this approach is called an Actor.
-This Actor, such as Merchant or Cashier, is built to be more intelligent than a traditional service, such as products-service or billing-service.
+This Actor, such as the Merchant or Cashier, is built to be more intelligent than a traditional service, such as the products-service or billing-service.
 The Actor should model the user that is using the system and not just the processes in the system.
 We will ask better questions when we model the system based on what the user does rather than the data the user needs.
 The answers to these questions will help to build the desired system.
@@ -82,9 +62,9 @@ The answers to these questions will help to build the desired system.
 ![](images/boa-general-documentation-Showcase-Retail-App.drawio.png)
 
 The diagram above shows the Actors that will be referred to in the documentation.
-The software included in the download has code for each of these Actors.
-The retail application is described in the Getting Started documentation.
-It supports native Java and NodeJS execution, Docker Compose and Kubernetes.
+The software included in the retail showcase application has code for each of these Actors.
+The retail application is described in the [Getting Started](../../README.md) documentation.
+It supports native Java, NodeJS, Docker Compose and Kubernetes.
 
 ### There is no application
 
@@ -92,10 +72,12 @@ The users most likely use multiple applications to get their work done.
 In modeling the Actor, we want to account for the entire workflow even if some processing will be done outside the new code for a period of time.
 There are business reuse opportunities with this approach.
 
-### Take advantage of a Cloud-centric architecture
+This concept is further discussed in the [Concepts](Concepts.md) document.
 
-Most people reading this already know some advantages of a Cloud-centric architecture.
-One of the major advantages is knocking down of walls between applications.
+### Take advantage of a Cloud-Centric architecture
+
+Most people reading this already know some advantages of a Cloud-Centric architecture.
+One of the major advantages is the knocking down of walls between applications.
 This allows for reuse that was difficult before.
 
 Another advantage is the built-in grid-computing support in platforms, such as Kubernetes.
@@ -108,21 +90,21 @@ An example of this communication is the 'publish/subscribe' model.
 This technique is easier to scale and does not require a front load balancer for each endpoint.
 
 With the async approach, it is recommended that the actor pushes information to the client.
-To facilitate this on the browser, the standard approach uses websockets.
+To facilitate this on the browser, the standard approach is to use websockets.
 
 ### Peer to Peer Communication
 
 Instead of the standard request/response communication, the BOA approach uses peer-to-peer communication.
-This communication path runs both ways and not unidirectional.
+This communication path runs both ways and is not unidirectional.
 
-Even though there appears to be more coupling than the unidirectional approach, there is not because the interaction is essentially with an interface.
+Even though there appears to be more coupling than the unidirectional approach, the coupling is avoided because the interaction is essentially with an interface.
 This distributed strategy is discussed further throughout the document.
 
 ![](images/boa-general-documentation-Communication.drawio.png)
 
-The actors can communicate with any actor in the Vicinity.
-The actors dynamically register and perform interactions.
-The medium for communication is Redis.
+As part of the Vicinity metaphor, the actors can communicate with any actor in the Vicinity.
+To aid in system flexibility, the actors dynamically register and perform interactions.
+As stated before, the medium for communication is Redis.
 
 
 ### Innate Behavior
@@ -130,8 +112,10 @@ The medium for communication is Redis.
 
 The actors naturally communicate to achieve the desired results.
 They are built in a bottom-up style once they have been defined.
+The developers should focus on each Actor's interface and behavior and then integrate with other Actors being developed.
 
 If necessary, the actor has the ability to acquire new behavior dynamically based on a script of business rules.
+In other words, an Actor can learn.
 
 ### Concept Simplicity
 
@@ -139,6 +123,9 @@ If necessary, the actor has the ability to acquire new behavior dynamically base
 
 The actor interacts with human understandable objects that hide the underlying technology.
 The utility items represent similar concepts that the actual user may use if operating outside the computer.
+
+In the diagram above, there is a Bulletin board, Task list and To-Do list.
+Though these items are backed by Redis and require the Redis API to use them the components offer a developer friendly interface.
 
 ## Vision
 
@@ -151,14 +138,14 @@ The platform will run on any of the environments in gray shown in the image abov
 The preferred runtime environment is Kubernetes or Docker Compose/Swarm because of the grid-computing capabilities.
 But, since the Actor is just a running process, it can run directly on a VM, desktop or another environment.
 
-The key platform that ties the Vicinity together is Redis.
-All native async communication uses it.
-Since it is an open source platform, Redis can be swapped out with another communication mechanism, but currently only Redis is supported.
+The key component that ties the Vicinity together is Redis.
+All BOA native asynchronous communication uses it.
+Since it is an open-source platform, Redis can be swapped out with another communication mechanism, but currently only Redis is supported.
 
-There is support for a ubiquitous environment.
+By relying only on Redis, there is support for a ubiquitous environment.
 For instance, an Actor running on the desktop can communicate with an Actor running on Kubernetes, Docker, etc.
 
-Besides, the built-in security, it is up to each deployment to provide connection security, such as whitelisting Redis port access.
+Besides, the built-in security, it is up to each deployment to provide packet-level security, such as whitelisting Redis port access.
 It is also up to each deployment to configure passwords for Redis as this current release does not require a password.
 
 
@@ -187,23 +174,23 @@ There should be minimal installation required to use it.
 ![](images/Vision/boa-general-documentation-Vision-Smart-Actor.drawio.png)
 
 The expectation of this Actor is different from some garden variety services.
-In some services, the burden is on the user of the service to carefully map to the services API to use it correctly.
+In some services, the burden is on the user of the service to carefully map to the service's API to use it correctly.
 Any mistake leads to frustration, because the developers of the service only support a narrow path of usage.
 This path is often poorly defined and tested.
 
 The smart Actor should support a variety of inputs and be easy to work with.
-This is the same way we feel about coworkers.
+This is the same way we feel about coworkers and how they feel about us.
 That is our standard to code to.
 
 In the top diagram above, the Accountant was written in a limited fashion where it only supports XML.
-This helped out the developers, because they had less to do, but it made reuse very difficult.
-More than likely, the developers went elsewhere for the processing that was needed.
+This helped out the Gerbal Tax developers, because they had less to do, but it made reuse very difficult.
+More than likely, the Merchant developers went elsewhere for the processing that was needed.
 Nobody likes working with APIs like that.
 
-In the bottom diagram, the Accountant was written to consume a variety of input.
-It is possible that there is mapping logic built into the Accountant as the first step inside the container.
-This is preferred over putting the burden on the developer to find some ETL application just to use the Accounting service.
-The smart Actor has a higher chance of reuse.
+In the bottom diagram, the Gerbal Tax Accountant was written to consume a variety of input.
+The Gerbal Tax Accountant developers may have built mapping logic into the Actor as the first step inside the container.
+This is preferred over putting the burden on the Merchant developer to find some ETL application just to use the Gerbal Tax Accounting service.
+It is easy to conclude, that the smart Actor has a higher chance of reuse.
 
 This reuse benefits the organization, which now does not have duplicate processes to manage.
 Let's write applications to this standard.
@@ -215,7 +202,7 @@ Let's write applications to this standard.
 The image above links to an AI Maze based on the same concepts supported in the platform.
 The Actors are built to be as smart as ants and will navigate through a moving maze.
 They can see the information necessary to make decisions.
-They are smart and will work properly in any maze that provides the API that they use.
+They are smart and will work properly in any maze that provides the API that they can access.
 
 Giving Actors the runtime information they need to process correctly is another principle in this approach.
 
@@ -260,7 +247,7 @@ Separating out microservices doesn't help if they are actually coupled into a di
 It is important to analyze whether a feature should be solved by two separate microservices or one combined microservice.
 The answer is case by case and based on analysis.
 
-With the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) approach, the BOA Actor division is a nice reason to split an application.
+With the [Architecture-First](https://tonymarius.substack.com/p/architecture-first-strategy?utm_source=url) strategy, the BOA Actor division is a nice reason to split an application.
 Alternatively, the non-BOA technique to split a microservice is based on process breakdowns.
 
 ![](images/Vision/boa-general-documentation-Vision-Loose-Coupling.drawio.png)
@@ -269,7 +256,7 @@ The diagram above, shows two approaches for designing microservices.
 
 ### Potential Microservice Architecture
 
-In the top diagram, the microservices are designed base on categories of processing.
+In the top diagram, the microservices are designed based on categories of processing.
 At first this seems like a logical choice.
 Our process breakdown approach may lead us to this design.
 
@@ -289,14 +276,15 @@ If a developer changes the access methods to the database it does not affect the
 
 This design is not limited to the BOA approach, but the BOA approach can lead to a simpler application structure.
 The BOA approach also lines up nicely with a company's organizational structure.
+Regardless of this benefit, just like in Use Cases, the Actors should be designed around roles and not job positions.
 
 ## Backward and Forward Compatibility
 
 For the sake of resilience, microservices should be designed in a backward and forward compatible fashion.
 The exception is if the previous application API was completely wrong and is producing results that must be fixed immediately.
 
-If there is a new parameter added to a request in generation 1.0.2 it should honor the requests sent in format for generation 1.0.1.
-There should be a policy to honor X number of versions of code and gradually deprecate the previous API when possible.
+If there is a new parameter added to a request in generation 1.0.2 it should honor the requests sent in the format for generation 1.0.1.
+There should be a policy to honor X number of versions of code and gradually deprecate the previous APIs when possible.
 
 This will aid the Blue/Green deployment where a new generation and old generation can run together for a period of time.
 Rollbacks become much easier with this strategy.
@@ -304,7 +292,7 @@ Rollbacks become much easier with this strategy.
 Correspondingly, the 1.0.1. code should not break with a new parameter that it does not recognize.
 The code should log a warning that a field is not supported or ignore it altogether.
 
-Based on requirements and the project strategy, the Actor that does not understand a command can also put the message in a To-Do list or Queue for another Actor who understands the message to pick up and process.
+Based on requirements and the project strategy, the Actor that does not understand a command can also put the message in a To-Do list or a Queue for another Actor who understands the message to pick up and process.
 This is considered the Escalate Request technique.
 
 
@@ -314,7 +302,7 @@ The key to backward compatibility is to fashion the code to handle features for 
 In the diagram above, there are two version of the Merchant as well as 2 versions of the Customer.
 We want to welcome this instead of constantly fighting this situation with the standard versioning techniques.
 
-The Merchant 1.0.2 has some new feature, and it also involved a database change.
+In our scenario, the Merchant 1.0.2 has some new feature, and it also involved a database change.
 In this case, the developers of the Merchant have decided to make non-breaking changes to support the new feature.
 This is beneficial because who likes to use libraries that are constantly making breaking changes?
 
@@ -329,11 +317,11 @@ Since Merchant 1.0.1 was written to be forward compatible, it does not break and
 The Customer is still served even though some new features are not returned.
 
 If Customer 1.0.1 interacts with Merchant 1.0.2 without the new Season field Merchant 1.0.2 should not fail.
-It should behave the same way Merchant 1.0.1 would and return the data in the previous release format.
+It should behave the same way Merchant 1.0.1 would and return the data in the previous release's format.
 This can be achieved by including Merchant 1.0.1 code in Merchant 1.0.2 or running both simultaneously.
 
 An exception to this philosophy is the situation where the new field must be supported or the results are invalid.
-In this case, the Actors handling mismatched message versions should return an error or attempt to pass off to an Actor of the proper version.
+In this case, the Actors handling mismatched message versions should return an error or attempt to pass off the work to an Actor of the proper version.
 
 ## Links
 - [Concepts](Concepts.md)
